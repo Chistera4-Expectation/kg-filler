@@ -1,0 +1,4 @@
+[submodule "data"]
+	path = data
+	url = git@github.com:Chistera4-Expectation/knowledge-graphs.git
+	branch = master
