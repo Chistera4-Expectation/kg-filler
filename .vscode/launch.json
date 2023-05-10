@@ -5,10 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "kgfiller.ai",
+            "name": "kgfiller.ai main",
             "type": "python",
             "request": "launch",
             "module": "kgfiller.ai",
+            "justMyCode": true
+        },
+        {
+            "name": "kgfiller.kg main",
+            "type": "python",
+            "request": "launch",
+            "module": "kgfiller.kg",
             "justMyCode": true
         }
     ]
