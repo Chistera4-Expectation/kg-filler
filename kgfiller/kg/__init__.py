@@ -13,6 +13,23 @@ if not ONTOLOGY_PATH.exists():
     raise FileNotFoundError(f"ONTOLOGY_PATH {ONTOLOGY_PATH.absolute()} does not exist")
 
 
+def first(iterable: typing.Iterable[typing.Any]) -> typing.Any:
+    return next(iter(iterable))
+
+
+def first_or_none(iterable: typing.Iterable[typing.Any]) -> typing.Any:
+    try:
+        return first(iterable)
+    except StopIteration:
+        return None
+    
+def instance_of(instance: owlready.Thing, cls: owlready.ThingClass) -> bool:
+    for type in cls.ancestors():
+        for t in instance.is_a:
+            if t == type:
+                return True
+    return False
+
 class KnowledgeGraph:
     def __init__(self, path: pathlib.Path=ONTOLOGY_PATH) -> None:
         self._path = path
@@ -29,16 +46,16 @@ class KnowledgeGraph:
             if cls.ancestors() == {owlready.Thing, cls}:
                 things.add(cls)
         if len(things) == 1:
-            return next(iter(things))
+            return first(things)
         else:
             return owlready.Thing
     
     def add_instance(self, cls: str | owlready.ThingClass, name: str, add_to_class_if_existing: bool=True) -> owlready.Thing:
         cls = self.onto[cls] if isinstance(cls, str) else cls
-        if name in cls.instances():
-            instance = self.onto[cls]
+        instance = first_or_none(filter(lambda i: i.name == name, cls.instances()))
+        if instance is not None:
             if add_to_class_if_existing:
-                if instance.is_a(cls):
+                if instance_of(instance, cls):
                     logger.debug("Do nothing: entity %s is already instance of class %s", instance, cls)
                 else:
                     cls.is_instance_of.append(instance)
