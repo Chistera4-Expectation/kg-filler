@@ -2,3 +2,4 @@ notebook==6.5.4
 openai==0.27.6
 Owlready2==0.41
 lazy-property==0.0.1
+GitPython==3.1.31
