@@ -68,7 +68,7 @@ class KnowledgeGraph:
             return owlready.Thing
         
     def add_property(self, cls_or_instance: owlready.ThingClass | owlready.Thing, property: str, value: owlready.ThingClass | owlready.Thing | str) -> None:
-        property_values = cls_or_instance[property]
+        property_values = getattr(cls_or_instance, property)
         if value not in property_values:
             property_values.append(value)
         logger.debug("Set property '%s' of %s to %s", property, cls_or_instance, value)
@@ -83,7 +83,7 @@ class KnowledgeGraph:
                 if instance_of(instance, cls):
                     logger.debug("Do nothing: entity %s is already instance of class %s", instance, cls)
                 else:
-                    cls.is_instance_of.append(instance)
+                    instance.is_instance_of.append(cls)
                     logger.debug("Added instance %s to class %s", instance, cls)
             else:
                 raise KeyError(f"Instance {name} already exists in classes {instance.is_instance_of}")
