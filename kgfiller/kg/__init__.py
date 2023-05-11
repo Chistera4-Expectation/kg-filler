@@ -5,12 +5,12 @@ import pathlib
 import typing
 
 
-ONTOLOGY_PATH = PATH_DATA_DIR / "ontology.owl"
-logger.debug("ONTOLOGY_PATH = %s", ONTOLOGY_PATH.absolute())
+PATH_ONTOLOGY = PATH_DATA_DIR / "ontology.owl"
+logger.debug("ONTOLOGY_PATH = %s", PATH_ONTOLOGY.absolute())
 
 
-if not ONTOLOGY_PATH.exists():
-    raise FileNotFoundError(f"ONTOLOGY_PATH {ONTOLOGY_PATH.absolute()} does not exist")
+if not PATH_ONTOLOGY.exists():
+    raise FileNotFoundError(f"ONTOLOGY_PATH {PATH_ONTOLOGY.absolute()} does not exist")
 
 
 def first(iterable: typing.Iterable[typing.Any]) -> typing.Any:
@@ -31,7 +31,7 @@ def instance_of(instance: owlready.Thing, cls: owlready.ThingClass) -> bool:
     return False
 
 class KnowledgeGraph:
-    def __init__(self, path: pathlib.Path=ONTOLOGY_PATH) -> None:
+    def __init__(self, path: pathlib.Path=PATH_ONTOLOGY) -> None:
         self._path = path
         self._uri = path.as_uri()
     
