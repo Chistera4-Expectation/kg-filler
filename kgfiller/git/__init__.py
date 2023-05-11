@@ -24,13 +24,15 @@ class DataRepository(git.Repo):
                 raise FileNotFoundError(f"File {f} does not exist")
             else:
                 all_files[i] = f.relative_to(self.working_dir)
-        full_message = escape(f"{message}\n\n{description}" if description else message)
+        full_message = f"{message}\n\n{description}" if description else message
+        # full_message = f"\"{full_message}\""
         self.git.add(*all_files)
+        file_names = list(map(str, all_files))
         try:
             self.git.commit("-m", full_message)
-            logger.info("Committed changes to files %s, with message: `%s`", map(str, all_files), message)
+            logger.info("Committed changes to files %s, with message: `%s`", file_names, message)
         except git.exc.GitCommandError as e:
             if "nothing to commit" in (str(e.stdout) + str(e.stderr)):
-                logger.info("Files %s, didin't change: skipping commit", map(str, all_files))
+                logger.info("Files %s, didin't change: skipping commit", file_names)
             else:
                 raise e
