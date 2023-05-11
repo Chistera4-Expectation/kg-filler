@@ -32,7 +32,8 @@ class DataRepository(git.Repo):
             self.git.commit("-m", full_message)
             logger.info("Committed changes to files %s, with message: `%s`", file_names, message)
         except git.exc.GitCommandError as e:
-            if "nothing to commit" in (str(e.stdout) + str(e.stderr)):
+            error_message = (str(e.stdout) + str(e.stderr))
+            if "nothing to commit" in error_message or "nothing added to commit" in error_message or "no changes added to commit" in error_message:
                 logger.info("Files %s, didin't change: skipping commit", file_names)
             else:
                 raise e
