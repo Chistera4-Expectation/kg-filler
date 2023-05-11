@@ -7,6 +7,10 @@ from lazy_property import LazyProperty
 import hashlib
 import json
 import typing
+import re
+
+
+PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+|\s*)\s*(.*?)$", re.MULTILINE)
 
 
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
@@ -87,6 +91,14 @@ class AiQuery:
     @property
     def result_text(self) -> str:
         return unescape(self.result['choices'][0]['message']['content'])
+    
+    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[str]:
+        items = PATTERN_LIST_ITEM.findall(self.result_text)
+        if skip_first:
+            items = items[1:]
+        if skip_last:
+            items = items[:-1]
+        return map(str.strip, items)
 
 
 def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100) -> AiQuery:

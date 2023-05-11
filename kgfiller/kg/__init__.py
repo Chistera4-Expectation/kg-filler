@@ -1,8 +1,9 @@
 import owlready2 as owlready
-from kgfiller import logger, PATH_DATA_DIR
+from kgfiller import logger, PATH_DATA_DIR, replace_symbols_with
 from lazy_property import LazyProperty
 import pathlib
 import typing
+import unidecode
 
 
 PATH_ONTOLOGY = PATH_DATA_DIR / "ontology.owl"
@@ -36,8 +37,14 @@ def human_name(cls_or_instance: owlready.ThingClass | owlready.Thing) -> str:
     return first_or_none(cls_or_instance.fancyName) or cls_or_instance.name
 
 
-def create_query_for_instances(cls: owlready.ThingClass) -> str:
-    return f"compact list of instances of class '{human_name(cls)}'"
+def owl_name(name: str, instance: bool=True) -> str:
+    name = unidecode.unidecode(name)
+    name = name.strip()
+    name = replace_symbols_with(name, "_")
+    name = name.lower()
+    if not instance:
+        name = name.capitalize()
+    return name
 
 
 class KnowledgeGraph:
@@ -59,8 +66,16 @@ class KnowledgeGraph:
             return first(things)
         else:
             return owlready.Thing
+        
+    def add_property(self, cls_or_instance: owlready.ThingClass | owlready.Thing, property: str, value: owlready.ThingClass | owlready.Thing | str) -> None:
+        property_values = cls_or_instance[property]
+        if value not in property_values:
+            property_values.append(value)
+        logger.debug("Set property '%s' of %s to %s", property, cls_or_instance, value)
     
     def add_instance(self, cls: str | owlready.ThingClass, name: str, add_to_class_if_existing: bool=True) -> owlready.Thing:
+        fancy_name = name
+        name = owl_name(name)
         cls = self.onto[cls] if isinstance(cls, str) else cls
         instance = first_or_none(filter(lambda i: i.name == name, cls.instances()))
         if instance is not None:
@@ -75,6 +90,8 @@ class KnowledgeGraph:
         else:
             instance = cls(name)
             logger.debug("Created instance %s of class %s", instance, cls)
+        if self.onto.fancyName is not None and name != fancy_name:
+            self.add_property(instance, "fancyName", fancy_name)
         return instance
 
     def visit_classes_depth_first(self, root: str | owlready.ThingClass | None = None, postorder=True) -> typing.Iterable[owlready.ThingClass]:
@@ -96,3 +113,7 @@ class KnowledgeGraph:
     
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.save()
+
+
+def create_query_for_instances(cls: owlready.ThingClass) -> str:
+    return f"compact list of instances of class '{human_name(cls)}'"
