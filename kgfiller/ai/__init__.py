@@ -1,6 +1,6 @@
 import openai
 import os
-from kgfiller import logger, PATH_DATA_DIR
+from kgfiller import logger, PATH_DATA_DIR, unescape
 import pathlib
 from dataclasses import dataclass
 from lazy_property import LazyProperty
@@ -52,33 +52,33 @@ class AiQuery:
         return result
 
     @LazyProperty
-    def _cache_path(self) -> pathlib.Path:
+    def cache_path(self) -> pathlib.Path:
         id = _str_hash(f"query#{self.question}#{self.model}#{self.limit}")
         return PATH_DATA_DIR / f"cache-{id}.json"
 
     def _cache(self):
-        overwrite = self._cache_path.exists()
+        overwrite = self.cache_path.exists()
         verb = "Overwriting cache of" if overwrite else "Caching"
-        logger.debug("%s query `%s` into file %s", verb, self, self._cache_path.absolute())
-        with open(self._cache_path, "w") as f:
+        logger.debug("%s query `%s` into file %s", verb, self, self.cache_path.absolute())
+        with open(self.cache_path, "w") as f:
             completion = self._chat_completion
             f.write(str(completion))
 
     def _parse_cache(self) -> dict:
-        logger.debug("Parsing cache file %s", self._cache_path.absolute())
-        if not self._cache_path.exists():
-            raise FileNotFoundError(f"Cache file {self._cache_path.absolute()} does not exist")
-        with open(self._cache_path, "r") as f:
+        logger.debug("Parsing cache file %s", self.cache_path.absolute())
+        if not self.cache_path.exists():
+            raise FileNotFoundError(f"Cache file {self.cache_path.absolute()} does not exist")
+        with open(self.cache_path, "r") as f:
             try:
                 return json.load(f)
             except json.JSONDecodeError:
-                logger.warning("Removing invalid cache file %s", self._cache_path.absolute())
-                self._cache_path.unlink()
+                logger.warning("Removing invalid cache file %s", self.cache_path.absolute())
+                self.cache_path.unlink()
                 return None
 
     @property
     def result(self) -> typing.Union[openai.ChatCompletion, dict]:
-        if not self._cache_path.exists():
+        if not self.cache_path.exists():
             self._cache()
             return self._chat_completion
         else:
@@ -86,8 +86,8 @@ class AiQuery:
         
     @property
     def result_text(self) -> str:
-        return self.result['choices'][0]['message']['content']
+        return unescape(self.result['choices'][0]['message']['content'])
 
 
-def query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100) -> AiQuery:
+def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100) -> AiQuery:
     return AiQuery(question=question, model=model, limit=limit)

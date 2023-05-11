@@ -1,5 +1,5 @@
-from kgfiller.ai import query, stats
+from kgfiller.ai import ai_query, stats
 
-q = query("What is the meaning of life?")
+q = ai_query("What is the meaning of life?")
 print(q.result_text)
 print(stats)

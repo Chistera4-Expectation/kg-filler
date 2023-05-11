@@ -22,13 +22,23 @@ def first_or_none(iterable: typing.Iterable[typing.Any]) -> typing.Any:
         return first(iterable)
     except StopIteration:
         return None
-    
+
+
 def instance_of(instance: owlready.Thing, cls: owlready.ThingClass) -> bool:
     for type in cls.ancestors():
         for t in instance.is_a:
             if t == type:
                 return True
     return False
+
+
+def human_name(cls_or_instance: owlready.ThingClass | owlready.Thing) -> str:
+    return first_or_none(cls_or_instance.fancyName) or cls_or_instance.name
+
+
+def create_query_for_instances(cls: owlready.ThingClass) -> str:
+    return f"compact list of instances of class '{human_name(cls)}'"
+
 
 class KnowledgeGraph:
     def __init__(self, path: pathlib.Path=PATH_ONTOLOGY) -> None:

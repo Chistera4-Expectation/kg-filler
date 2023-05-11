@@ -2,15 +2,9 @@ from typing import Type, Any
 import git
 import pathlib
 from gitdb.db.loose import LooseObjectDB
-from kgfiller import logger, PATH_DATA_DIR
+from kgfiller import logger, PATH_DATA_DIR, escape
 from kgfiller.kg import PATH_ONTOLOGY
 
-
-ESCAPED = str.maketrans({"\n":  r"\n", "\n":  r"\n"})
-
-
-def escape(string: str) -> str:
-    return string.translate(ESCAPED)
 
 class DataRepository(git.Repo):
     def __init__(self, path: Any | None = None, odbt: Type[LooseObjectDB] = git.GitCmdObjectDB, search_parent_directories: bool = False, expand_vars: bool = True) -> None:
