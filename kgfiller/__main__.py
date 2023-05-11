@@ -25,5 +25,6 @@ with DataRepository() as repo:
             else:
                 for instance in results:
                     kg.add_instance(cls, instance)
-                commit(repo, query, cls)
+                kg.save()
+            commit(repo, query, cls)
             # input("Press enter to continue...")
