@@ -9,4 +9,4 @@ with DataRepository() as repo:
         for cls in kg.visit_classes_depth_first():
             i = kg.add_instance(cls, f"dummy_{cls.name.lower()}")
             kg.save()
-            repo.commit_edits(f"add dummy instance for class {cls}: {i.name}")
+            repo.commit_edits_if_any(f"add dummy instance for class {cls}: {i.name}")

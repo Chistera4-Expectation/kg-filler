@@ -18,7 +18,7 @@ class DataRepository(git.Repo):
             path = PATH_DATA_DIR
         git.Repo.__init__(self, path, odbt, search_parent_directories, expand_vars)
 
-    def commit_edits(self, message: str, file: str | pathlib.Path = None, description=None, *other_files):
+    def commit_edits_if_any(self, message: str, file: str | pathlib.Path = None, description=None, *other_files):
         if file is None:
             file = PATH_ONTOLOGY
         elif not isinstance(file, pathlib.Path):
