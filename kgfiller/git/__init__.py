@@ -32,5 +32,11 @@ class DataRepository(git.Repo):
                 all_files[i] = f.relative_to(self.working_dir)
         full_message = escape(f"{message}\n\n{description}" if description else message)
         self.git.add(*all_files)
-        self.git.commit("-m", full_message)
-        logger.info("Committed changes to files %s, with message:\n\t%s", all_files, message)
+        try:
+            self.git.commit("-m", full_message)
+            logger.info("Committed changes to files %s, with message: `%s`", map(str, all_files), message)
+        except git.exc.GitCommandError as e:
+            if "nothing to commit" in (str(e.stdout) + str(e.stderr)):
+                logger.info("Files %s, didin't change: skipping commit", map(str, all_files))
+            else:
+                raise e
