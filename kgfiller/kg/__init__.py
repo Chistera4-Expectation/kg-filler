@@ -77,9 +77,12 @@ class KnowledgeGraph:
         if postorder:
             yield root
 
+    def save(self) -> None:
+        self.onto.save(str(self._path))
+
     def __enter__(self) -> "KnowledgeGraph":
         self.onto
         return self
     
     def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.onto.save(str(self._path))
+        self.save()

@@ -17,6 +17,13 @@
             "request": "launch",
             "module": "kgfiller.kg",
             "justMyCode": true
+        },
+        {
+            "name": "kgfiller main",
+            "type": "python",
+            "request": "launch",
+            "module": "kgfiller",
+            "justMyCode": true
         }
     ]
 }

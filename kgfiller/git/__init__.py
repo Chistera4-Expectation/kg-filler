@@ -13,10 +13,10 @@ def escape(string: str) -> str:
     return string.translate(ESCAPED)
 
 class DataRepository(git.Repo):
-    def __init__(self, path: Any | None = None, odbt: Type[LooseObjectDB] = ..., search_parent_directories: bool = False, expand_vars: bool = True) -> None:
+    def __init__(self, path: Any | None = None, odbt: Type[LooseObjectDB] = git.GitCmdObjectDB, search_parent_directories: bool = False, expand_vars: bool = True) -> None:
         if path is None:
             path = PATH_DATA_DIR
-        super().__init__(path, odbt, search_parent_directories, expand_vars)
+        git.Repo.__init__(self, path, odbt, search_parent_directories, expand_vars)
 
     def commit_edits(self, message: str, file: str | pathlib.Path = None, description=None, *other_files):
         if file is None:
