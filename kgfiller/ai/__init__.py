@@ -42,6 +42,7 @@ class AiQuery:
     question: str
     model: str
     limit: int
+    attempt: int
 
     @LazyProperty
     def _chat_completion(self) -> openai.ChatCompletion:
@@ -54,10 +55,17 @@ class AiQuery:
         )
         stats.plus(result)
         return result
+    
+    @property
+    def id(self):
+        id = f"query#{self.question}#{self.model}#{self.limit}"
+        if self.attempt is not None:
+            id += "#" + {self.attempt}
+        return id
 
     @LazyProperty
     def cache_path(self) -> pathlib.Path:
-        id = _str_hash(f"query#{self.question}#{self.model}#{self.limit}")
+        id = _str_hash(self.id)
         return PATH_DATA_DIR / f"cache-{id}.json"
 
     def _cache(self):
@@ -98,8 +106,8 @@ class AiQuery:
             items = items[1:]
         if skip_last:
             items = items[:-1]
-        return map(str.strip, items)
+        return list(map(str.strip, items))
 
 
-def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100) -> AiQuery:
-    return AiQuery(question=question, model=model, limit=limit)
+def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
+    return AiQuery(question, model, limit, attempt)
