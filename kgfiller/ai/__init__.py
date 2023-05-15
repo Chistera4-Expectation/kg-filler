@@ -8,9 +8,29 @@ import hashlib
 import yaml
 import typing
 import re
+from dataclasses import dataclass
 
 
 PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+|\s*)\s*(.*?)$", re.MULTILINE)
+PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
+
+
+@dataclass
+class Item:
+    value: str
+    metadata: typing.Optional[str] = None
+
+    @staticmethod
+    def from_string(string: str) -> typing.List["Item"]:
+        items = []
+        for match in PATTERN_ITEM_WITH_PARENTHESES.finditer(string):
+            items.append(Item(match.group(1).strip(), match.group(2).strip()))
+        if len(items) == 0:
+            items.append(Item(string.strip()))
+        return items
+
+    def __str__(self) -> str:
+        return self.value + (f" ({self.metadata})" if self.metadata else "")
 
 
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
@@ -109,7 +129,7 @@ class AiQuery:
             items = items[1:]
         if skip_last:
             items = items[:-1]
-        return list(map(str.strip, items))
+        return [i for item in items for i in Item.from_string(item)]
 
 
 def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
