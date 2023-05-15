@@ -65,15 +65,59 @@ class Commitable(typing.Protocol):
     @property
     def files(self) -> typing.List[pathlib.Path]:
         ...
-    
+
     @property
     def should_commit(self) -> bool:
         ...
 
+    def __eq__(self, other: object) -> bool:
+        return self.message == other.message and self.description == other.description and self.files == other.files and self.should_commit == other.should_commit
+    
+    def __hash__(self) -> int:
+        return hash((self.message, self.description, self.files, self.should_commit))
 
 @dataclass
 class Commit(Commitable):
-    message: str
-    files: typing.List[pathlib.Path]
-    description: str = None
-    should_commit: bool = True
+    def __init__(self, message: str, files: typing.List[pathlib.Path], description: str = None, should_commit: bool = True):
+        self._message = message
+        self._files = files
+        self._description = description
+        self._should_commit = should_commit
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @description.setter
+    def description(self, value: str):
+        self._description = value
+    
+    @property
+    def message(self) -> str:
+        return self._message
+
+    @message.setter
+    def message(self, value: str):
+        self._message = value
+    
+    @property
+    def files(self) -> typing.List[pathlib.Path]:
+        return self._files
+    
+    @files.setter
+    def files(self, value: typing.List[pathlib.Path]):
+        self._files = value
+
+    @property
+    def should_commit(self) -> bool:
+        return self._should_commit
+
+    @should_commit.setter
+    def should_commit(self, value: bool):
+        self._should_commit = value
+
+    def __str__(self) -> str:
+        return f"Commit({self.message}, {self.files}, {self.description}, {self.should_commit})"
+    
+    def __repr__(self) -> str:
+        return str(self)

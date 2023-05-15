@@ -1,4 +1,4 @@
-from kgfiller import logger, Commitable, Commit
+from kgfiller import logger, Commitable, Commit, PATH_DATA_DIR
 from kgfiller.kg import KnowledgeGraph, create_query_for_instances, owl_name, human_name
 from kgfiller.ai import ai_query
 import owlready2 as owlready
@@ -14,13 +14,13 @@ def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, max_r
                 continue
             for instance in results:
                 kg.add_instance(cls, instance)
+            files = [kg.path, query.cache_path]
             return Commit(
                 message=f"add {len(results)} instances to class {human_name(cls)} from AI answer",
                 description="Query: " + query.question + ".\n"
                         "Instances being added:\n- " + \
                         "\n- ".join(map(owl_name, results)) + \
-                        "\nQuery cache in file: " + \
-                        str(query.cache_path.relative_to(kg.path)),
-                files=[kg.path, query.cache_path],
+                        "\nQuery cache in file: " + str(files[1]),
+                files=files,
             )
         

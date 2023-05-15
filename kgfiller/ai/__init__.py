@@ -60,7 +60,7 @@ class AiQuery:
     def id(self):
         id = f"query#{self.question}#{self.model}#{self.limit}"
         if self.attempt is not None:
-            id += "#" + {self.attempt}
+            id += f"#{self.attempt}"
         return id
 
     @LazyProperty
@@ -75,7 +75,7 @@ class AiQuery:
         with open(self.cache_path, "w") as f:
             print(f"# Cache for query: {self.question}", file=f)
             print(f"# (model: {self.model}, limit: {self.limit}", end='', file=f)
-            print(f", attempt: {self.attempt})" if self.attempt is not None else '', file=f)
+            print(f", attempt: {self.attempt})" if self.attempt is not None else ')', file=f)
             completion = yaml.safe_load(str(self._chat_completion))
             yaml.dump(completion, f)
 

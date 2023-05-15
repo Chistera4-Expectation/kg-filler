@@ -42,7 +42,7 @@ class DataRepository(git.Repo):
             
     def maybe_commit(self, commitable: Commitable):
         if commitable.should_commit:
-            return self.commit_edits_if_any(commitable.commit_message, commitable.files[0], commitable.description, *commitable.files[1:])
+            return self.commit_edits_if_any(commitable.message, commitable.files[0], commitable.description, *commitable.files[1:])
         else:
             logger.info("Nothing to commit")
             return False
