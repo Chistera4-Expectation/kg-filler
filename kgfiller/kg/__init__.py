@@ -117,11 +117,3 @@ class KnowledgeGraph:
     
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.save()
-
-
-def create_query_for_instances(cls: owlready.ThingClass) -> str:
-    cls_name = f'{human_name(cls)}'
-    return [f'{it} {cls_name}' for it in { 
-        "instances list for class",
-        "examples list for",
-    }]

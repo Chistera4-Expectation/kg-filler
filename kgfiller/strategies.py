@@ -1,11 +1,27 @@
 from kgfiller import logger, Commitable, Commit
-from kgfiller.kg import KnowledgeGraph, create_query_for_instances
+from kgfiller.kg import KnowledgeGraph, human_name
 from kgfiller.ai import ai_query
 import owlready2 as owlready
+import typing
 
 
-def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, max_retries: int = 2) -> Commitable:
-    for question in create_query_for_instances(cls):
+CLASS_NAME = "__CLASS_NAME__"
+CLASS_NAME_FANCY = "__CLASS_NAME_FANCY_"
+
+
+def _apply_replacements(pattern: str, replacements: typing.Dict[str, str]) -> str:
+    for key, value in replacements.items():
+        pattern = pattern.replace(key, value)
+    return pattern
+
+
+def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, queries: typing.List[str], max_retries: int = 2) -> Commitable:
+    replacements = {
+        CLASS_NAME: cls.name,
+        CLASS_NAME_FANCY: human_name(cls),
+    }
+    questions = [_apply_replacements(pattern, replacements) for pattern in queries]
+    for question in questions:
         for attempt in range(0, max_retries):
             query = ai_query(question=question, attempt=attempt if attempt > 0 else None)
             results = list(query.result_to_list())
