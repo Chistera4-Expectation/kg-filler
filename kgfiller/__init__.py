@@ -1,6 +1,8 @@
 import logging
 import pathlib
 import re
+import typing
+from dataclasses import dataclass
 
 
 logger = logging.getLogger("kgfiller")
@@ -49,3 +51,29 @@ def replace_symbols_with(name: str, replacement: str) -> str:
     while replaced.endswith(replacement):
         replaced = replaced[:-1]
     return replaced
+
+
+class Commitable(typing.Protocol):
+    @property
+    def description(self) -> str:
+        ...
+    
+    @property
+    def message(self) -> str:
+        ...
+    
+    @property
+    def files(self) -> typing.List[pathlib.Path]:
+        ...
+    
+    @property
+    def should_commit(self) -> bool:
+        ...
+
+
+@dataclass
+class Commit(Commitable):
+    message: str
+    files: typing.List[pathlib.Path]
+    description: str = None
+    should_commit: bool = True

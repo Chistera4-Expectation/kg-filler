@@ -2,7 +2,7 @@ from typing import Type, Any
 import git
 import pathlib
 from gitdb.db.loose import LooseObjectDB
-from kgfiller import logger, PATH_DATA_DIR, escape
+from kgfiller import logger, PATH_DATA_DIR, Commitable
 from kgfiller.kg import PATH_ONTOLOGY
 
 
@@ -31,9 +31,18 @@ class DataRepository(git.Repo):
         try:
             self.git.commit("-m", full_message)
             logger.info("Committed changes to files %s, with message: `%s`", file_names, message)
+            return True
         except git.exc.GitCommandError as e:
             error_message = (str(e.stdout) + str(e.stderr))
             if "nothing to commit" in error_message or "nothing added to commit" in error_message or "no changes added to commit" in error_message:
                 logger.info("Files %s, didin't change: skipping commit", file_names)
+                return False
             else:
                 raise e
+            
+    def maybe_commit(self, commitable: Commitable):
+        if commitable.should_commit:
+            return self.commit_edits_if_any(commitable.commit_message, commitable.files[0], commitable.description, *commitable.files[1:])
+        else:
+            logger.info("Nothing to commit")
+            return False
