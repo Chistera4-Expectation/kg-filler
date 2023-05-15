@@ -5,7 +5,7 @@ import pathlib
 from dataclasses import dataclass
 from lazy_property import LazyProperty
 import hashlib
-import json
+import yaml
 import typing
 import re
 
@@ -66,15 +66,18 @@ class AiQuery:
     @LazyProperty
     def cache_path(self) -> pathlib.Path:
         id = _str_hash(self.id)
-        return PATH_DATA_DIR / f"cache-{id}.json"
+        return PATH_DATA_DIR / f"cache-{id}.yml"
 
     def _cache(self):
         overwrite = self.cache_path.exists()
         verb = "Overwriting cache of" if overwrite else "Caching"
         logger.debug("%s query `%s` into file %s", verb, self, self.cache_path.absolute())
         with open(self.cache_path, "w") as f:
-            completion = self._chat_completion
-            f.write(str(completion))
+            print(f"# Cache for query: {self.question}", file=f)
+            print(f"# (model: {self.model}, limit: {self.limit}", end='', file=f)
+            print(f", attempt: {self.attempt})" if self.attempt is not None else '', file=f)
+            completion = yaml.safe_load(str(self._chat_completion))
+            yaml.dump(completion, f)
 
     def _parse_cache(self) -> dict:
         logger.debug("Parsing cache file %s", self.cache_path.absolute())
@@ -82,8 +85,8 @@ class AiQuery:
             raise FileNotFoundError(f"Cache file {self.cache_path.absolute()} does not exist")
         with open(self.cache_path, "r") as f:
             try:
-                return json.load(f)
-            except json.JSONDecodeError:
+                return yaml.safe_load(f)
+            except yaml.YAMLError:
                 logger.warning("Removing invalid cache file %s", self.cache_path.absolute())
                 self.cache_path.unlink()
                 return None
