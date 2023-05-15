@@ -9,6 +9,7 @@ import yaml
 import typing
 import re
 from dataclasses import dataclass
+import time
 
 
 PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+|\s*)\s*(.*?)$", re.MULTILINE)
@@ -64,8 +65,7 @@ class AiQuery:
     limit: int
     attempt: int
 
-    @LazyProperty
-    def _chat_completion(self) -> openai.ChatCompletion:
+    def _chat_completion_step(self) -> openai.ChatCompletion:
         result = openai.ChatCompletion.create(
             model=self.model,
             max_tokens=self.limit,
@@ -75,6 +75,16 @@ class AiQuery:
         )
         stats.plus(result)
         return result
+
+    @LazyProperty
+    def _chat_completion(self) -> openai.ChatCompletion:
+        while True:
+            try:
+                return self._chat_completion_step()
+            except openai.error.RateLimitError:
+                logger.warning("Rate limit exceeded, retrying in 1 minute")
+                time.sleep(60)
+            
     
     @property
     def id(self):

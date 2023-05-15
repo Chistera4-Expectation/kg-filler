@@ -71,7 +71,9 @@ class KnowledgeGraph:
         else:
             return owlready.Thing
         
-    def add_property(self, cls_or_instance: owlready.ThingClass | owlready.Thing, property: str, value: owlready.ThingClass | owlready.Thing | str) -> None:
+    def add_property(self, cls_or_instance: owlready.ThingClass | owlready.Thing, property: str | owlready.ObjectPropertyClass, value: owlready.ThingClass | owlready.Thing | str) -> None:
+        if isinstance(property, owlready.ObjectPropertyClass):
+            property = property.name
         property_values = getattr(cls_or_instance, property)
         if value not in property_values:
             property_values.append(value)
