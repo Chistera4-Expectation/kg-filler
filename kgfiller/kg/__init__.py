@@ -51,6 +51,10 @@ class KnowledgeGraph:
     def __init__(self, path: pathlib.Path=PATH_ONTOLOGY) -> None:
         self._path = path
         self._uri = path.as_uri()
+
+    @property
+    def path(self) -> pathlib.Path:
+        return self._path
     
     @LazyProperty
     def onto(self) -> owlready.Ontology:
@@ -116,4 +120,8 @@ class KnowledgeGraph:
 
 
 def create_query_for_instances(cls: owlready.ThingClass) -> str:
-    return f"compact list of instances of class '{human_name(cls)}'"
+    cls_name = f'{human_name(cls)}'
+    return [f'{it} {cls_name}' for it in { 
+        "instances list for class",
+        "examples list for",
+    }]
