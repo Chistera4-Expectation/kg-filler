@@ -1,5 +1,14 @@
 from kgfiller.ai import ai_query, stats
+from kgfiller import enable_logging
 
-q = ai_query("What is the meaning of life?")
-print(q.result_text)
-print(stats)
+enable_logging()
+
+while True:
+    try:
+        question = input("?- ")
+        query = ai_query(question)
+        for result in query.result_to_list():
+            print("\t-", result)
+        stats.print()
+    except EOFError:
+        break

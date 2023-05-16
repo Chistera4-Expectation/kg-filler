@@ -54,6 +54,11 @@ class OpenAiStats:
         self.total_api_calls += 1
         self.total_tokens += other.usage.total_tokens
 
+    def print(self, prefix: str = None):
+        if prefix:
+            print(prefix, end='')
+        print("total API calls:", self.total_api_calls, "total tokens:", self.total_tokens, flush=True)
+
 
 stats = OpenAiStats()
 
