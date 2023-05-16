@@ -37,18 +37,28 @@ In this way, users may inspect the list of automatic additions to the ontology, 
     ```
     (`begin` is a tag to the initial commit were the ontology only contains classes but no instances, nor relations)
 
-3. [Optional] Restore cache files from another branch (say, `my-branch`)
+3. Start a new branch for your filling process (say, `my-branch`)
     ```bash
-    git checkout my-branch -- '*.yml'
+    git checkout -b my-branch
+    ```
+
+4. [Optional] Restore cache files from another branch (say, `other-branch`)
+    ```bash
+    git checkout other-branch -- '*.yml'
     ```
     This may be useful if one wants to reuse the cache file from some other thread of work
 
-4. Reset the Git stage to avoid committing all edits in a single commit
+5. Reset the Git stage to avoid committing all edits in a single commit
     ```bash
     git reset .
     ```
 
-5. Spawn the filling process
+6. Move back to the `kg-filler` project directory
+    ```bash
+    cd ..
+    ```
+
+7. Spawn the filling process
     ```bash
     python -m kgfiller
     ```
