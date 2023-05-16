@@ -14,6 +14,7 @@ import time
 
 PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+|\s*)\s*(.*?)$", re.MULTILINE)
 PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
+PATTERN_ITEM_WITH_DETAILS = re.compile(r"(.+?)(?:(?:\s+-+\s+|:\s+)(.+))")
 
 
 @dataclass
@@ -25,6 +26,8 @@ class Item:
     def from_string(string: str) -> typing.List["Item"]:
         items = []
         for match in PATTERN_ITEM_WITH_PARENTHESES.finditer(string):
+            items.append(Item(match.group(1).strip(), match.group(2).strip()))
+        for match in PATTERN_ITEM_WITH_DETAILS.finditer(string):
             items.append(Item(match.group(1).strip(), match.group(2).strip()))
         if len(items) == 0:
             items.append(Item(string.strip()))
