@@ -26,6 +26,7 @@ def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, queri
     }
     questions = [_apply_replacements(pattern, replacements) for pattern in queries]
     for question in questions:
+        files = [kg.path]
         for attempt in range(0, max_retries):
             query = ai_query(question=question, attempt=attempt if attempt > 0 else None)
             results = list(query.result_to_list())
@@ -36,8 +37,10 @@ def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, queri
             for result in results:
                 instance = kg.add_instance(cls, result.value)
                 description += f"\n- {result} => adding instance {instance.name} to class {cls.name}"
-            files = [kg.path, query.cache_path]
-            description += f"\nQuery cache in file: {str(files[1])}"
+            files.append(query.cache_path)
+            description += f"\nQuery cache in files:"
+            for file in files[1:]:
+                description += f"\n- {str(file)}"
             return Commit(
                 message=f"add {len(results)} instances to class {cls.name} from AI answer",
                 description=description,
