@@ -1,5 +1,6 @@
 import owlready2 as owlready
 from kgfiller import logger, PATH_DATA_DIR, replace_symbols_with
+from kgfiller.utils import overlap
 from lazy_property import LazyProperty
 import pathlib
 import typing
@@ -23,14 +24,21 @@ def first_or_none(iterable: typing.Iterable[typing.Any]) -> typing.Any:
         return first(iterable)
     except StopIteration:
         return None
+    
+
+def ancestors(cls_or_instance: owlready.ThingClass | owlready.Thing) -> typing.Iterable[owlready.ThingClass]:
+    if isinstance(cls_or_instance, owlready.ThingClass):
+        yield from cls_or_instance.ancestors()
+    else:
+        met = set()
+        for cls in cls_or_instance.is_a:
+            if cls not in met:
+                yield from cls.ancestors()
+                met.add(cls)
 
 
 def instance_of(instance: owlready.Thing, cls: owlready.ThingClass) -> bool:
-    for type in cls.ancestors():
-        for t in instance.is_a:
-            if t == type:
-                return True
-    return False
+    return overlap(ancestors(instance), ancestors(cls))
 
 
 def human_name(cls_or_instance: owlready.ThingClass | owlready.Thing) -> str:
