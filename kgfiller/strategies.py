@@ -48,7 +48,7 @@ def find_instances_for_class(kg: KnowledgeGraph, cls: owlready.ThingClass, queri
             )
 
 
-def find_related_instances(kg: KnowledgeGraph, instance: owlready.Thing, relation: owlready.ObjectPropertyClass, default_class: owlready.ThingClass, queries: typing.List[str], max_retries: int = 2) -> Commitable:
+def find_related_instances(kg: KnowledgeGraph, instance: owlready.Thing, relation: owlready.ObjectPropertyClass, default_class: owlready.ThingClass, queries: typing.List[str], instance_as_object: bool = False, max_retries: int = 2) -> Commitable:
     replacements = {
         INSTANCE_NAME: instance.name,
         INSTANCE_NAME_FANCY: human_name(instance),
@@ -66,7 +66,10 @@ def find_related_instances(kg: KnowledgeGraph, instance: owlready.Thing, relatio
             description = f"Query: {query.question}.\nAnswers:"
             for result in results:
                 new_instance = kg.add_instance(default_class, result.value)
-                kg.add_property(instance, relation, new_instance)
+                if instance_as_object:
+                    kg.add_property(new_instance, relation, instance)
+                else:
+                    kg.add_property(instance, relation, new_instance)
                 description += f"\n- {result} => adding instance {new_instance.name} to class {default_class.name}, and relate it to {instance.name} as {relation.name}"
             files = [kg.path, query.cache_path]
             description += f"\nQuery cache in file: {str(files[1])}"

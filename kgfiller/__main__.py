@@ -26,9 +26,7 @@ with DataRepository() as repo:
             commit = find_instances_for_class(kg, cls, instance_queries)
             kg.save()
             repo.maybe_commit(commit)
-        #     # input("Press enter to continue...")
-        # for instance in kg.onto.Recipe.instances():
-        #     commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries)
-        #     kg.save()
-        #     repo.maybe_commit(commit)
-        #     # input("Press enter to continue...")
+        for instance in kg.onto.Recipe.instances():
+            commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True)
+            kg.save()
+            repo.maybe_commit(commit)
