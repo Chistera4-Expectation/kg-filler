@@ -10,6 +10,19 @@ PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
 PATTERN_ITEM_WITH_DETAILS = re.compile(r"(.+?)(?:(?:\s+-+\s+|:\s+)(.+))")
 
 
+DEFAULT_SEPARATING_WORDS = {"and", "with", "or"}
+
+
+def split_recursively(text: str, separators: typing.List[str] = None) -> typing.Iterable[str]:
+    if separators is None:
+        separators = list(DEFAULT_SEPARATING_WORDS)
+    if len(separators) == 0:
+        yield text.strip()
+    else:
+        for item in text.split(separators[0]):
+            yield from split_recursively(item, separators[1:])
+
+
 @dataclass
 class Item:
     value: str
@@ -25,6 +38,12 @@ class Item:
         if len(items) == 0:
             items.append(Item(string.strip()))
         return items
+    
+    def split_by_words(self, words: typing.List[str] = None) -> typing.List[str]:
+        if words is not None and any(word in self.value for word in words):
+            return list(split_recursively(self.value, words))
+        else:
+            return [self.value]
 
     def __str__(self) -> str:
         return self.value + (f" ({self.metadata})" if self.metadata else "")

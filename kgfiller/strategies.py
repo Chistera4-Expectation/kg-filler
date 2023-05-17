@@ -65,12 +65,13 @@ def find_related_instances(kg: KnowledgeGraph, instance: owlready.Thing, relatio
                 continue
             description = f"Query: {query.question}.\nAnswers:"
             for result in results:
-                new_instance = kg.add_instance(default_class, result.value)
-                if instance_as_object:
-                    kg.add_property(new_instance, relation, instance)
-                else:
-                    kg.add_property(instance, relation, new_instance)
-                description += f"\n- {result} => adding instance {new_instance.name} to class {default_class.name}, and relate it to {instance.name} as {relation.name}"
+                for word in result.split_by_words():
+                    new_instance = kg.add_instance(default_class, word)
+                    if instance_as_object:
+                        kg.add_property(new_instance, relation, instance)
+                    else:
+                        kg.add_property(instance, relation, new_instance)
+                    description += f"\n- {word} => adding instance {new_instance.name} to class {default_class.name}, and relate it to {instance.name} as {relation.name}"
             files = [kg.path, query.cache_path]
             description += f"\nQuery cache in file: {str(files[1])}"
             return Commit(
