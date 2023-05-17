@@ -25,7 +25,7 @@ class DataRepository(git.Repo):
             else:
                 all_files[i] = f.relative_to(self.working_dir)
         full_message = f"{message}\n\n{description}" if description else message
-        # full_message = f"\"{full_message}\""
+        self.git.reset(".")
         self.git.add(*all_files)
         file_names = list(map(str, all_files))
         try:
