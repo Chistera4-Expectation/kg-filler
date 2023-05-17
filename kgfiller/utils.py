@@ -18,3 +18,14 @@ def overlap(a: typing.Iterable, b: typing.Iterable) -> bool:
             met_in_b.add(item_b)
     except StopIteration:
         return False
+
+
+def first(iterable: typing.Iterable[typing.Any]) -> typing.Any:
+    return next(iter(iterable))
+
+
+def first_or_none(iterable: typing.Iterable[typing.Any]) -> typing.Any:
+    try:
+        return first(iterable)
+    except StopIteration:
+        return None

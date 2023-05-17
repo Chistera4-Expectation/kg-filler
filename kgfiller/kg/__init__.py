@@ -1,6 +1,6 @@
 import owlready2 as owlready
 from kgfiller import logger, PATH_DATA_DIR, replace_symbols_with
-from kgfiller.utils import overlap
+from kgfiller.utils import *
 from lazy_property import LazyProperty
 import pathlib
 import typing
@@ -13,17 +13,6 @@ logger.debug("ONTOLOGY_PATH = %s", PATH_ONTOLOGY.absolute())
 
 if not PATH_ONTOLOGY.exists():
     raise FileNotFoundError(f"ONTOLOGY_PATH {PATH_ONTOLOGY.absolute()} does not exist")
-
-
-def first(iterable: typing.Iterable[typing.Any]) -> typing.Any:
-    return next(iter(iterable))
-
-
-def first_or_none(iterable: typing.Iterable[typing.Any]) -> typing.Any:
-    try:
-        return first(iterable)
-    except StopIteration:
-        return None
     
 
 def ancestors(cls_or_instance: owlready.ThingClass | owlready.Thing) -> typing.Iterable[owlready.ThingClass]:
