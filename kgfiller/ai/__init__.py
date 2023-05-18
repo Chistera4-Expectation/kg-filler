@@ -1,13 +1,15 @@
-import openai
 import os
-from kgfiller import logger, PATH_DATA_DIR, unescape
-from kgfiller.text import itemize, str_hash, Item
 import pathlib
-from lazy_property import LazyProperty
-import yaml
+import time
 import typing
 from dataclasses import dataclass
-import time
+
+import openai
+import yaml
+from lazy_property import LazyProperty
+
+from kgfiller import logger, PATH_DATA_DIR, unescape
+from kgfiller.text import itemize, str_hash, Item
 
 
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
