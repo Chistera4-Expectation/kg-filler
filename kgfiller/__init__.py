@@ -2,7 +2,6 @@ import logging
 import pathlib
 import re
 import typing
-from dataclasses import dataclass
 
 
 logger = logging.getLogger("kgfiller")
@@ -76,7 +75,7 @@ class Commitable(typing.Protocol):
     def __hash__(self) -> int:
         return hash((self.message, self.description, self.files, self.should_commit))
 
-@dataclass
+
 class Commit(Commitable):
     def __init__(self, message: str, files: typing.List[pathlib.Path], description: str = None, should_commit: bool = True):
         self._message = message

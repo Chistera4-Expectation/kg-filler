@@ -1,5 +1,4 @@
 from kgfiller import enable_logging
-from kgfiller.kg import KnowledgeGraph
 from kgfiller.git import DataRepository
 from kgfiller.strategies import *
 

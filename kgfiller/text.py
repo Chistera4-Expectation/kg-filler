@@ -1,8 +1,7 @@
-import re
-from dataclasses import dataclass
-import typing
 import hashlib
-
+import re
+import typing
+from dataclasses import dataclass
 
 PATTERN_INLINE_LIST_ITEM = re.compile(r"(?:,\s+(?:and\s+)?)?([^,.]+)", re.IGNORECASE)
 PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+)\s*(.*?)$", re.MULTILINE)

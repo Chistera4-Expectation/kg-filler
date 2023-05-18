@@ -1,9 +1,8 @@
 import openai
 import os
 from kgfiller import logger, PATH_DATA_DIR, unescape
-from kgfiller.text import itemize, str_hash
+from kgfiller.text import itemize, str_hash, Item
 import pathlib
-from dataclasses import dataclass
 from lazy_property import LazyProperty
 import yaml
 import typing
@@ -111,7 +110,7 @@ class AiQuery:
     def result_text(self) -> str:
         return unescape(self.result['choices'][0]['message']['content'])
     
-    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[str]:
+    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[Item]:
         return itemize(self.result_text, skip_first, skip_last)
 
 

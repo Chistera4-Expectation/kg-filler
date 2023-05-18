@@ -1,11 +1,12 @@
-import owlready2 as owlready
-from kgfiller import logger, PATH_DATA_DIR, replace_symbols_with
-from kgfiller.utils import *
-from lazy_property import LazyProperty
 import pathlib
 import typing
-import unidecode
 
+import owlready2 as owlready
+import unidecode
+from lazy_property import LazyProperty
+
+from kgfiller import logger, PATH_DATA_DIR, replace_symbols_with
+from kgfiller.utils import *
 
 PATH_ONTOLOGY = PATH_DATA_DIR / "ontology.owl"
 logger.debug("ONTOLOGY_PATH = %s", PATH_ONTOLOGY.absolute())
