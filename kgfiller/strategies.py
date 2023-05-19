@@ -213,7 +213,7 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
 
         def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
             self.describe(f"meaning that the most adequate type for {instance.name} is {result.name}.")
-            i = kg.set_class_of_instance(instance, result, reset=True)
+            i = kg.set_class_of_instance(instance, result)
             self.describe(f"Current classes of {i.name} are:")
             for cls in i.is_a:
                 self.describe(f"- {cls.name}")

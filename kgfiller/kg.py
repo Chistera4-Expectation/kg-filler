@@ -79,15 +79,18 @@ class KnowledgeGraph:
             property_values.append(value)
         logger.debug("Set property '%s' of %s to %s", property, cls_or_instance, value)
 
-    def set_class_of_instance(self, instance: owlready.Thing, cls: str | owlready.ThingClass,
-                              reset: bool = False) -> owlready.Thing:
-        if reset:
-            instance.is_instance_of = []
+    def set_class_of_instance(self, instance: owlready.Thing, cls: str | owlready.ThingClass) -> owlready.Thing:
         if instance_of(instance, cls):
-            logger.debug(
-                "Do nothing: entity %s is already instance of classes %s, "
-                "therefore it is already an instance of %s",
-                instance, instance.is_a, cls)
+            for c in instance.is_instance_of:
+                if c != owlready.Thing and supertype(c, cls, strict=True):
+                    instance.is_instance_of.remove(c)
+                    instance.is_instance_of.append(cls)
+                    logger.debug("Move instance %s to class %s from more specific class %s", instance, cls, c)
+                else:
+                    logger.debug(
+                        "Do nothing: entity %s is already instance of classes %s, "
+                        "therefore it is already an instance of %s",
+                        instance, instance.is_a, cls)
         else:
             instance.is_instance_of.append(cls)
             logger.debug("Added instance %s to class %s", instance, cls)

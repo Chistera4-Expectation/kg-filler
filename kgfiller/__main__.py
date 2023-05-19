@@ -36,9 +36,13 @@ with DataRepository() as repo:
             commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True)
             kg.save()
             repo.maybe_commit(commit)
+        already_met_instances = set()
         for cls in kg.visit_classes_depth_first():
             if not is_leaf(cls) and not subtype(cls, Recipe):
                 for instance in cls.instances():
-                    commit = move_to_most_adequate_subclass(kg, instance, cls, rebalance_queries)
-                    kg.save()
-                    repo.maybe_commit(commit)
+                    if instance not in already_met_instances:
+                        already_met_instances.add(instance)
+                        commit = move_to_most_adequate_subclass(kg, instance, cls, rebalance_queries)
+                        commit.should_commit = True
+                        kg.save()
+                        repo.maybe_commit(commit)
