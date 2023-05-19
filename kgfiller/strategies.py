@@ -32,6 +32,7 @@ class QueryProcessor(Commit):
     def __init__(self):
         Commit.__init__(self, "", [], "", True)
         self._kg = None
+        self._queries = []
 
     def reset(self, kg: KnowledgeGraph):
         self._kg = kg
@@ -50,6 +51,7 @@ class QueryProcessor(Commit):
         raise NotImplementedError()
 
     def __call__(self, query: AiQuery) -> bool:
+        self._queries.append(query)
         self.files.append(query.cache_path)
         if not self.admissible(self._kg, query):
             return False
@@ -68,6 +70,14 @@ class QueryProcessor(Commit):
         self.describe("Query cache in files:")
         for file in self.files[1:]:
             self.describe(f"- {str(file)}")
+
+    def inconclusive(self):
+        self.message = f"inconclusive sequence of {len(self._queries)} queries"
+        self.should_commit = False
+        self.description = ""
+        self.describe("Queries:")
+        for query in self._queries:
+            self.describe(f"?- {query.question}\n\t!- {query.result_text}")
 
 
 class MultipleResultsQueryProcessor(QueryProcessor):
@@ -108,7 +118,7 @@ class SingleResultQueryProcessor(QueryProcessor):
 
     def process(self, kg: KnowledgeGraph, query: AiQuery):
         self.describe(f"Query: {query.question}.\nAnswer:\n\t{query.result_text}")
-        return self.process_result(kg, query, self._result)
+        return [self.process_result(kg, query, self._result)]
 
     def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any) -> typing.Any:
         raise NotImplementedError()
@@ -129,6 +139,8 @@ def _make_queries(kg: KnowledgeGraph,
                 continue
             query_processor.describe_caches()
             return query_processor
+    query_processor.inconclusive()
+    return query_processor
 
 
 def find_instances_for_class(kg: KnowledgeGraph,
@@ -191,20 +203,21 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
                                 queries: typing.List[str],
                                 max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
     class MoveToMostAdequateClassQueryProcessor(SingleResultQueryProcessor):
-        def process(self, kg: KnowledgeGraph, query: AiQuery):
-            super().process(kg, query)
-            self.message = f"make {instance.name} an instance of classes {[cls.name for cls in instance.is_a]} " \
-                           f"from AI answer",
+
+        def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            instance = results[0]
+            return f"make {instance.name} an instance of classes {[cls.name for cls in instance.is_a]} from AI answer"
 
         def parse_result(self, kg: KnowledgeGraph, query: AiQuery) -> typing.Any:
             return first_or_none(cls for name, cls in sub_types_by_name.items() if name in query.result_text)
 
         def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
             self.describe(f"meaning that the most adequate type for {instance.name} is {result.name}.")
-            i = kg.add_instance(result, instance.name)
+            i = kg.set_class_of_instance(instance, result, reset=True)
             self.describe(f"Current classes of {i.name} are:")
             for cls in i.is_a:
-                self.describe(f"\n- {cls.name}")
+                self.describe(f"- {cls.name}")
+            return i
 
     sub_types_by_name = dict()
     replacements = {

@@ -75,6 +75,10 @@ class Commitable(typing.Protocol):
     def __hash__(self) -> int:
         return hash((self.message, self.description, self.files, self.should_commit))
 
+    def print(self):
+        print(self.message)
+        print(self.description)
+
 
 class Commit(Commitable):
     def __init__(self, message: str, files: typing.List[pathlib.Path], description: str = None, should_commit: bool = True):
