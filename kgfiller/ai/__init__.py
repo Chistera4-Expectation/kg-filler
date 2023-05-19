@@ -57,14 +57,15 @@ class AiQuery:
 
     @LazyProperty
     def _chat_completion(self) -> openai.ChatCompletion:
+        timeout = 30  # seconds
         while True:
             try:
                 return self._chat_completion_step()
             except openai.error.RateLimitError:
-                logger.warning("Rate limit exceeded, retrying in 1 minute")
-                time.sleep(60)
-            
-    
+                logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
+                time.sleep(timeout)
+                timeout *= 1.5
+
     @property
     def id(self):
         id = f"query#{self.question}#{self.model}#{self.limit}"
