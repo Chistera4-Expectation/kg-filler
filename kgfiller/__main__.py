@@ -1,5 +1,6 @@
 from kgfiller import enable_logging
 from kgfiller.git import DataRepository
+from kgfiller.kg import KnowledgeGraph, is_leaf, subtype
 from kgfiller.strategies import *
 
 
@@ -19,8 +20,14 @@ recipe_queries = [
 ]
 
 
+rebalance_queries = [
+    f"most adequate class for '{INSTANCE_NAME_FANCY}' among: {CLASS_LIST_FANCY}. concise",
+]
+
+
 with DataRepository() as repo:
     with KnowledgeGraph() as kg:
+        Recipe = kg.onto.Recipe
         for cls in kg.visit_classes_depth_first():
             commit = find_instances_for_class(kg, cls, instance_queries)
             kg.save()
@@ -29,3 +36,9 @@ with DataRepository() as repo:
             commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True)
             kg.save()
             repo.maybe_commit(commit)
+        for cls in kg.visit_classes_depth_first():
+            if not is_leaf(cls) and not subtype(cls, Recipe):
+                for instance in cls.instances():
+                    commit = move_to_most_adequate_subclass(kg, instance, cls, rebalance_queries)
+                    kg.save()
+                    repo.maybe_commit(commit)

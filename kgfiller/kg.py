@@ -15,12 +15,16 @@ if not PATH_ONTOLOGY.exists():
     raise FileNotFoundError(f"ONTOLOGY_PATH {PATH_ONTOLOGY.absolute()} does not exist")
 
 
+def is_leaf(cls: owlready.ThingClass) -> bool:
+    return len(cls.descendants(include_self=False)) == 0
+
+
 def subtype(cls1: owlready.ThingClass, cls2: owlready.ThingClass, strict: bool = False) -> bool:
-    return overlap(set(cls1), cls2.descendants(include_self=not strict))
+    return overlap([cls1], cls2.descendants(include_self=not strict))
 
 
 def supertype(cls1: owlready.ThingClass, cls2: owlready.ThingClass, strict: bool = False) -> bool:
-    return overlap(set(cls1), cls2.ancestors(include_self=not strict))
+    return overlap([cls1], cls2.ancestors(include_self=not strict))
 
 
 def instance_of(instance: owlready.Thing, cls: owlready.ThingClass) -> bool:
@@ -75,6 +79,20 @@ class KnowledgeGraph:
             property_values.append(value)
         logger.debug("Set property '%s' of %s to %s", property, cls_or_instance, value)
 
+    def set_class_of_instance(self, instance: owlready.Thing, cls: str | owlready.ThingClass,
+                              reset: bool = False) -> owlready.Thing:
+        if reset:
+            instance.is_instance_of = []
+        if instance_of(instance, cls):
+            logger.debug(
+                "Do nothing: entity %s is already instance of classes %s, "
+                "therefore it is already an instance of %s",
+                instance, instance.is_a, cls)
+        else:
+            instance.is_instance_of.append(cls)
+            logger.debug("Added instance %s to class %s", instance, cls)
+        return instance
+
     def add_instance(self, cls: str | owlready.ThingClass, name: str,
                      add_to_class_if_existing: bool = True) -> owlready.Thing:
         fancy_name = name
@@ -83,14 +101,7 @@ class KnowledgeGraph:
         instance = first_or_none(filter(lambda i: i.name == name, cls.instances()))
         if instance is not None:
             if add_to_class_if_existing:
-                if instance_of(instance, cls):
-                    logger.debug(
-                        "Do nothing: entity %s is already instance of classes %s, "
-                        "therefore it is already an instance of %s",
-                        instance, instance.is_a, cls)
-                else:
-                    instance.is_instance_of.append(cls)
-                    logger.debug("Added instance %s to class %s", instance, cls)
+                self.set_class_of_instance(instance, cls)
             else:
                 raise KeyError(f"Instance {name} already exists in classes {instance.is_instance_of}")
         else:
