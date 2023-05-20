@@ -80,20 +80,25 @@ class KnowledgeGraph:
         logger.debug("Set property '%s' of %s to %s", property, cls_or_instance, value)
 
     def set_class_of_instance(self, instance: owlready.Thing, cls: str | owlready.ThingClass) -> owlready.Thing:
-        if instance_of(instance, cls):
-            for c in instance.is_instance_of:
-                if c != owlready.Thing and supertype(c, cls, strict=True):
-                    instance.is_instance_of.remove(c)
-                    instance.is_instance_of.append(cls)
-                    logger.debug("Move instance %s to class %s from more specific class %s", instance, cls, c)
-                else:
-                    logger.debug(
-                        "Do nothing: entity %s is already instance of classes %s, "
-                        "therefore it is already an instance of %s",
-                        instance, instance.is_a, cls)
-        else:
+        initial = set(instance.is_instance_of)
+        too_generic_types = [c for c in instance.is_instance_of if supertype(c, cls, strict=True)]
+        too_specific_types = [c for c in instance.is_instance_of if subtype(c, cls, strict=False)]
+        if len(too_generic_types) > 0:
+            for type in too_generic_types:
+                instance.is_instance_of.remove(type)
+        if len(too_specific_types) == 0:
             instance.is_instance_of.append(cls)
-            logger.debug("Added instance %s to class %s", instance, cls)
+        if len(instance.is_instance_of) > 1 and owlready.ThingClass in instance.is_instance_of:
+            instance.is_instance_of.remove(owlready.Thing)
+        final = set(instance.is_instance_of)
+        for snapshot in [initial, final]:
+            if owlready.Thing in snapshot:
+                snapshot.remove(owlready.Thing)
+        if len(final) == len(initial):
+            logger.debug("Do nothing: %s is already instance of %s", instance, cls)
+        else:
+            logger.debug("Ensure individual %s is instance of class %s. "
+                         "Current classes of %s: %s", instance, cls, instance, final)
         return instance
 
     def add_instance(self, cls: str | owlready.ThingClass, name: str,
