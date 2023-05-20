@@ -1,6 +1,6 @@
 from kgfiller import enable_logging
 from kgfiller.git import DataRepository
-from kgfiller.kg import KnowledgeGraph, is_leaf, subtype
+from kgfiller.kg import KnowledgeGraph, subtype, is_leaf
 from kgfiller.strategies import *
 
 
@@ -42,7 +42,12 @@ with DataRepository() as repo:
                 for instance in cls.instances():
                     if instance not in already_met_instances:
                         already_met_instances.add(instance)
-                        commit = move_to_most_adequate_subclass(kg, instance, cls, rebalance_queries)
+                        commit = move_to_most_adequate_subclass(kg, instance, cls, leaf_descendants, rebalance_queries)
+                        if not commit.should_commit:
+                            commit.should_commit = True
+                            kg.save()
+                            repo.maybe_commit(commit)
+                            commit = move_to_most_adequate_subclass(kg, instance, cls, all_descendants, rebalance_queries)
                         commit.should_commit = True
                         kg.save()
                         repo.maybe_commit(commit)

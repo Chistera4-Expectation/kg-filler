@@ -4,7 +4,7 @@ import owlready2 as owlready
 
 from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery
-from kgfiller.kg import KnowledgeGraph, human_name
+from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
 from kgfiller.text import Item
 from kgfiller.utils import first_or_none
 
@@ -236,9 +236,26 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
     return _make_queries(kg, queries, MoveToMostAdequateClassQueryProcessor(), max_retries=max_retries, **replacements)
 
 
+SubClassSelector = typing.Callable[[owlready.ThingClass], typing.Iterable[owlready.ThingClass]]
+
+
+def direct_subclasses(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
+    return cls.subclasses()
+
+
+def all_descendants(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
+    return cls.descendants()
+
+
+def leaf_descendants(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
+    return (c for c in all_descendants(cls) if is_leaf(c))
+
+
 def move_to_most_adequate_subclass(kg: KnowledgeGraph,
                                    instance: owlready.Thing,
                                    root_class: owlready.ThingClass,
+                                   subclass_selector: SubClassSelector,
                                    queries: typing.List[str],
                                    max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
-    return move_to_most_adequate_class(kg, instance, root_class.subclasses(), queries, max_retries=max_retries)
+    classes = subclass_selector(root_class)
+    return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries)
