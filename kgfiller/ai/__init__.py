@@ -1,37 +1,15 @@
-import openai
 import os
-from kgfiller import logger, PATH_DATA_DIR, unescape
 import pathlib
-from dataclasses import dataclass
-from lazy_property import LazyProperty
-import hashlib
-import yaml
-import typing
-import re
-from dataclasses import dataclass
 import time
+import typing
+from dataclasses import dataclass
 
+import openai
+import yaml
+from lazy_property import LazyProperty
 
-PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+|\s*)\s*(.*?)$", re.MULTILINE)
-PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
-
-
-@dataclass
-class Item:
-    value: str
-    metadata: typing.Optional[str] = None
-
-    @staticmethod
-    def from_string(string: str) -> typing.List["Item"]:
-        items = []
-        for match in PATTERN_ITEM_WITH_PARENTHESES.finditer(string):
-            items.append(Item(match.group(1).strip(), match.group(2).strip()))
-        if len(items) == 0:
-            items.append(Item(string.strip()))
-        return items
-
-    def __str__(self) -> str:
-        return self.value + (f" ({self.metadata})" if self.metadata else "")
+from kgfiller import logger, PATH_DATA_DIR, unescape
+from kgfiller.text import itemize, str_hash, Item
 
 
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
@@ -41,10 +19,6 @@ else:
     logger.warning("Environment variable OPENAI_API_KEY unset or empty")
 
 
-def _str_hash(input: str, hash_function = 'sha256') -> str:
-    hashf = getattr(hashlib, hash_function)
-    return hashf(input.encode("utf-8")).hexdigest()
-
 @dataclass
 class OpenAiStats:
     total_api_calls: int = 0
@@ -53,6 +27,11 @@ class OpenAiStats:
     def plus(self, other: openai.ChatCompletion):
         self.total_api_calls += 1
         self.total_tokens += other.usage.total_tokens
+
+    def print(self, prefix: str = None):
+        if prefix:
+            print(prefix, end='')
+        print("total API calls:", self.total_api_calls, "total tokens:", self.total_tokens, flush=True)
 
 
 stats = OpenAiStats()
@@ -78,14 +57,15 @@ class AiQuery:
 
     @LazyProperty
     def _chat_completion(self) -> openai.ChatCompletion:
+        timeout = 30  # seconds
         while True:
             try:
                 return self._chat_completion_step()
             except openai.error.RateLimitError:
-                logger.warning("Rate limit exceeded, retrying in 1 minute")
-                time.sleep(60)
-            
-    
+                logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
+                time.sleep(timeout)
+                timeout *= 1.5
+
     @property
     def id(self):
         id = f"query#{self.question}#{self.model}#{self.limit}"
@@ -95,7 +75,7 @@ class AiQuery:
 
     @LazyProperty
     def cache_path(self) -> pathlib.Path:
-        id = _str_hash(self.id)
+        id = str_hash(self.id)
         return PATH_DATA_DIR / f"cache-{id}.yml"
 
     def _cache(self):
@@ -133,13 +113,8 @@ class AiQuery:
     def result_text(self) -> str:
         return unescape(self.result['choices'][0]['message']['content'])
     
-    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[str]:
-        items = PATTERN_LIST_ITEM.findall(self.result_text)
-        if skip_first:
-            items = items[1:]
-        if skip_last:
-            items = items[:-1]
-        return [i for item in items for i in Item.from_string(item)]
+    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[Item]:
+        return itemize(self.result_text, skip_first, skip_last)
 
 
 def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
