@@ -22,7 +22,7 @@ def split_recursively(text: str, separators: typing.List[str] = None) -> typing.
             yield from split_recursively(item, separators[1:])
 
 
-@dataclass
+@dataclass(frozen=True)
 class Item:
     value: str
     metadata: typing.Optional[str] = None
@@ -46,6 +46,18 @@ class Item:
 
     def __str__(self) -> str:
         return self.value + (f" ({self.metadata})" if self.metadata else "")
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __le__(self, other):
+        return self.value <= other.value
+
+    def __ge__(self, other):
+        return not(self < other)
+
+    def __gt__(self, other):
+        return not(self <= other)
     
 
 def str_hash(input: str, hash_function = 'sha256') -> str:
