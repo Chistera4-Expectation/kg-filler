@@ -11,7 +11,7 @@ from lazy_property import LazyProperty
 from kgfiller import logger, PATH_DATA_DIR, unescape
 from kgfiller.text import itemize, str_hash, Item
 
-
+MAX_TRIALS = 3
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
 if openai.api_key:
     logger.debug("Loaded API key from environment variable OPENAI_API_KEY")
@@ -44,14 +44,24 @@ class AiQuery:
     limit: int
     attempt: int
 
-    def _chat_completion_step(self) -> openai.ChatCompletion:
-        result = openai.ChatCompletion.create(
-            model=self.model,
-            max_tokens=self.limit,
-            messages=[
-                {"role": "user", "content": self.question}
-            ]
-        )
+    def _chat_completion_step(self, trials = 0) -> openai.ChatCompletion:
+        try:
+            result = openai.ChatCompletion.create(
+                model=self.model,
+                max_tokens=self.limit,
+                messages=[
+                    {"role": "user", "content": self.question}
+                ]
+            )
+        except openai.error.APIError as e:
+            trials += 1
+            if trials == MAX_TRIALS:
+                raise e
+            else:
+                logger.warning("API error: %s", e)
+                logger.warning("Retrying in 5 seconds")
+                time.sleep(5)
+                return self._chat_completion_step(trials)
         stats.plus(result)
         return result
 
