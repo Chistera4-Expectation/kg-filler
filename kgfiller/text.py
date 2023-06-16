@@ -8,7 +8,6 @@ PATTERN_LIST_ITEM = re.compile(r"^\n?(?:\d+.|[-*+]|[#]+)\s*(.*?)$", re.MULTILINE
 PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
 PATTERN_ITEM_WITH_DETAILS = re.compile(r"(.+?)(?:(?:\s+-+\s+|:\s+)(.+))")
 
-
 DEFAULT_SEPARATING_WORDS = {"and", "with", "or"}
 
 
@@ -37,7 +36,7 @@ class Item:
         if len(items) == 0:
             items.append(Item(string.strip()))
         return items
-    
+
     def split_by_words(self, words: typing.List[str] = None) -> typing.List[str]:
         if words is not None and any(word in self.value for word in words):
             return list(split_recursively(self.value, words))
@@ -46,14 +45,14 @@ class Item:
 
     def __str__(self) -> str:
         return self.value + (f" ({self.metadata})" if self.metadata else "")
-    
 
-def str_hash(input: str, hash_function = 'sha256') -> str:
+
+def str_hash(input: str, hash_function='sha256') -> str:
     hashf = getattr(hashlib, hash_function)
     return hashf(input.encode("utf-8")).hexdigest()
 
 
-def _listify_lines(text: str, skip_first: bool = None, skip_last: bool=None) -> typing.List[str]:
+def _listify_lines(text: str, skip_first: bool = None, skip_last: bool = None) -> typing.List[str]:
     if skip_first is None:
         skip_first = True
     if skip_last is None:
@@ -66,7 +65,7 @@ def _listify_lines(text: str, skip_first: bool = None, skip_last: bool=None) -> 
     return items
 
 
-def _listify_line(text: str, skip_first: bool = None, skip_last: bool=None) -> typing.List[str]:
+def _listify_line(text: str, skip_first: bool = None, skip_last: bool = None) -> typing.List[str]:
     if skip_first is None:
         skip_first = False
     if skip_last is None:
@@ -77,7 +76,7 @@ def _listify_line(text: str, skip_first: bool = None, skip_last: bool=None) -> t
     return items
 
 
-def listify(text: str, skip_first: bool = None, skip_last: bool=None) -> typing.List[str]:
+def listify(text: str, skip_first: bool = None, skip_last: bool = None) -> typing.List[str]:
     if "\n" in text:
         return _listify_lines(text, skip_first, skip_last)
     elif PATTERN_LIST_ITEM.fullmatch(text):
@@ -86,7 +85,7 @@ def listify(text: str, skip_first: bool = None, skip_last: bool=None) -> typing.
         return _listify_line(text, skip_first, skip_last)
 
 
-def itemize(text: str, skip_first: bool = None, skip_last: bool=None) -> typing.List[Item]:
+def itemize(text: str, skip_first: bool = None, skip_last: bool = None) -> typing.List[Item]:
     items = []
     for item in listify(text, skip_first, skip_last):
         items.extend(Item.from_string(item))

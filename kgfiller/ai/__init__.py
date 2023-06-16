@@ -3,15 +3,16 @@ import pathlib
 import time
 import typing
 from dataclasses import dataclass
-
 import openai
 import yaml
 from lazy_property import LazyProperty
-
 from kgfiller import logger, PATH_DATA_DIR, unescape
 from kgfiller.text import itemize, str_hash, Item
 
 MAX_TRIALS = 3
+# Temperature is a parameter that controls creativeness in the model's outputs.
+# The higher the temperature, the more creative the outputs. The lower the temperature, the more consistent the outputs.
+DEFAULT_TEMPERATURE = 0.2
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
 if openai.api_key:
     logger.debug("Loaded API key from environment variable OPENAI_API_KEY")
@@ -43,12 +44,14 @@ class AiQuery:
     model: str
     limit: int
     attempt: int
+    temperature: float
 
-    def _chat_completion_step(self, trials = 0) -> openai.ChatCompletion:
+    def _chat_completion_step(self, trials=0) -> openai.ChatCompletion:
         try:
             result = openai.ChatCompletion.create(
                 model=self.model,
                 max_tokens=self.limit,
+                temperature=self.temperature,
                 messages=[
                     {"role": "user", "content": self.question}
                 ]
@@ -94,7 +97,7 @@ class AiQuery:
         logger.debug("%s query `%s` into file %s", verb, self, self.cache_path.absolute())
         with open(self.cache_path, "w") as f:
             print(f"# Cache for query: {self.question}", file=f)
-            print(f"# (model: {self.model}, limit: {self.limit}", end='', file=f)
+            print(f"# (model: {self.model}, limit: {self.limit}, temperature: {self.temperature}", end='', file=f)
             print(f", attempt: {self.attempt})" if self.attempt is not None else ')', file=f)
             completion = yaml.safe_load(str(self._chat_completion))
             yaml.dump(completion, f)
@@ -118,14 +121,14 @@ class AiQuery:
             return self._chat_completion
         else:
             return self._parse_cache() or self._chat_completion
-        
+
     @property
     def result_text(self) -> str:
         return unescape(self.result['choices'][0]['message']['content'])
-    
+
     def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[Item]:
         return itemize(self.result_text, skip_first, skip_last)
 
 
-def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
-    return AiQuery(question, model, limit, attempt)
+def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None, temperature: float = DEFAULT_TEMPERATURE) -> AiQuery:
+    return AiQuery(question, model, limit, attempt, temperature)

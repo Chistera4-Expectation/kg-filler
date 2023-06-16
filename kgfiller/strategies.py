@@ -1,7 +1,5 @@
 import typing
-
 import owlready2 as owlready
-
 from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery
 from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
@@ -20,6 +18,7 @@ CLASS_LIST_FANCY = "__CLASS_LIST_FANCY_"
 
 
 DEFAULT_MAX_RETRIES = 2
+DEFAULT_TEMPERATURE = 0.2
 
 
 def _apply_replacements(pattern: str, **replacements) -> str:
@@ -128,12 +127,13 @@ def _make_queries(kg: KnowledgeGraph,
                   queries: typing.List[str],
                   query_processor: QueryProcessor,
                   max_retries: int,
+                  temperature: float,
                   **replacements) -> Commitable:
     questions = [_apply_replacements(pattern, **replacements) for pattern in queries]
     query_processor.reset(kg)
     for question in questions:
         for attempt in range(0, max_retries):
-            query = ai_query(question=question, attempt=attempt if attempt > 0 else None)
+            query = ai_query(question=question, attempt=attempt if attempt > 0 else None, temperature=temperature)
             if not query_processor(query):
                 logger.warning("No results for query '%s', AI answer: %s", query.question, query.result_text)
                 continue
@@ -146,7 +146,8 @@ def _make_queries(kg: KnowledgeGraph,
 def find_instances_for_class(kg: KnowledgeGraph,
                              cls: owlready.ThingClass,
                              queries: typing.List[str],
-                             max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+                             max_retries: int = DEFAULT_MAX_RETRIES,
+                             temperature: float = DEFAULT_TEMPERATURE) -> Commitable:
     class FindInstancesQueryProcessor(MultipleResultsQueryProcessor):
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
             return f"add {len(results)} instances to class {cls.name} from AI answer"
@@ -160,7 +161,7 @@ def find_instances_for_class(kg: KnowledgeGraph,
         CLASS_NAME: cls.name,
         CLASS_NAME_FANCY: human_name(cls),
     }
-    return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, **replacements)
+    return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, temperature=temperature, **replacements)
 
 
 def find_related_instances(kg: KnowledgeGraph,
@@ -169,7 +170,8 @@ def find_related_instances(kg: KnowledgeGraph,
                            default_class: owlready.ThingClass,
                            queries: typing.List[str],
                            instance_as_object: bool = False,
-                           max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+                           max_retries: int = DEFAULT_MAX_RETRIES,
+                           temperature: float = DEFAULT_TEMPERATURE) -> Commitable:
     class FindRelatedInstancesQueryProcessor(MultipleResultsQueryProcessor):
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
             return f"add {len(results)} instances to class {default_class.name}, and as many relations " \
@@ -194,14 +196,15 @@ def find_related_instances(kg: KnowledgeGraph,
         RELATION_NAME: relation.name,
         RELATION_NAME_FANCY: human_name(relation),
     }
-    return _make_queries(kg, queries, FindRelatedInstancesQueryProcessor(), max_retries=max_retries, **replacements)
+    return _make_queries(kg, queries, FindRelatedInstancesQueryProcessor(), max_retries=max_retries, temperature=temperature, **replacements)
 
 
 def move_to_most_adequate_class(kg: KnowledgeGraph,
                                 instance: owlready.Thing,
                                 classes: typing.Iterable[owlready.ThingClass],
                                 queries: typing.List[str],
-                                max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+                                max_retries: int = DEFAULT_MAX_RETRIES,
+                                temperature: float = DEFAULT_TEMPERATURE) -> Commitable:
     class MoveToMostAdequateClassQueryProcessor(SingleResultQueryProcessor):
 
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
@@ -233,7 +236,7 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
         sub_types_by_name[human_name(cls)] = cls
     replacements[CLASS_LIST] = ", ".join(replacements[CLASS_LIST])
     replacements[CLASS_LIST_FANCY] = ", ".join(replacements[CLASS_LIST_FANCY])
-    return _make_queries(kg, queries, MoveToMostAdequateClassQueryProcessor(), max_retries=max_retries, **replacements)
+    return _make_queries(kg, queries, MoveToMostAdequateClassQueryProcessor(), max_retries=max_retries, temperature=temperature, **replacements)
 
 
 SubClassSelector = typing.Callable[[owlready.ThingClass], typing.Iterable[owlready.ThingClass]]
@@ -256,6 +259,7 @@ def move_to_most_adequate_subclass(kg: KnowledgeGraph,
                                    root_class: owlready.ThingClass,
                                    subclass_selector: SubClassSelector,
                                    queries: typing.List[str],
-                                   max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+                                   max_retries: int = DEFAULT_MAX_RETRIES,
+                                   temperature: float = DEFAULT_TEMPERATURE) -> Commitable:
     classes = subclass_selector(root_class)
-    return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries)
+    return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries, temperature=temperature)

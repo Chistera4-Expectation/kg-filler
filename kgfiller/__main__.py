@@ -29,11 +29,11 @@ with DataRepository() as repo:
     with KnowledgeGraph() as kg:
         Recipe = kg.onto.Recipe
         for cls in kg.visit_classes_depth_first():
-            commit = find_instances_for_class(kg, cls, instance_queries)
+            commit = find_instances_for_class(kg, cls, instance_queries, temperature=DEFAULT_TEMPERATURE)
             kg.save()
             repo.maybe_commit(commit)
         for instance in kg.onto.Recipe.instances():
-            commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True)
+            commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True, temperature=DEFAULT_TEMPERATURE)
             kg.save()
             repo.maybe_commit(commit)
         already_met_instances = set()
@@ -42,12 +42,12 @@ with DataRepository() as repo:
                 for instance in cls.instances():
                     if instance not in already_met_instances:
                         already_met_instances.add(instance)
-                        commit = move_to_most_adequate_subclass(kg, instance, cls, leaf_descendants, rebalance_queries)
+                        commit = move_to_most_adequate_subclass(kg, instance, cls, leaf_descendants, rebalance_queries, temperature=DEFAULT_TEMPERATURE)
                         if not commit.should_commit:
                             commit.should_commit = True
                             kg.save()
                             repo.maybe_commit(commit)
-                            commit = move_to_most_adequate_subclass(kg, instance, cls, all_descendants, rebalance_queries)
+                            commit = move_to_most_adequate_subclass(kg, instance, cls, all_descendants, rebalance_queries, temperature=DEFAULT_TEMPERATURE)
                         commit.should_commit = True
                         kg.save()
                         repo.maybe_commit(commit)
