@@ -84,6 +84,8 @@ class AiQuery:
         id = f"query#{self.question}#{self.model}#{self.limit}"
         if self.attempt is not None:
             id += f"#{self.attempt}"
+        if self.temperature is not None:
+            id += f"#{self.temperature}"
         return id
 
     @LazyProperty
