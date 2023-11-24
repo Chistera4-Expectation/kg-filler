@@ -33,7 +33,6 @@ class Item:
     def from_string(string: str) -> typing.List["Item"]:
         items = []
         for match in PATTERN_ITEM_WITH_PARENTHESES.finditer(string):
-            print(Item(match.group(1).strip(), match.group(2).strip()))
             items.append(Item(match.group(1).strip(), match.group(2).strip()))
         for match in PATTERN_ITEM_WITH_DETAILS.finditer(string):
             items.append(Item(match.group(1).strip(), match.group(2).strip()))
@@ -58,10 +57,6 @@ def str_hash(input: str, hash_function = 'sha256') -> str:
 
 def _listify_lines(text: str) -> typing.List[str]:
     items = PATTERN_LIST_ITEM.findall(text)
-    print(items[-1].lower().split()[-1])
-    print(wordnet.synsets(items[-1].lower().split()[-1]))
-    print(items[-1].lower())
-    print(PATTERN_ITEM_WITH_OR_OPTION.match(items[-1].lower()))
     if PATTERN_ITEM_WITH_PARENTHESES.match(items[-1].lower()):
         items[-1] = items[-1].split('(')[0]
     elif PATTERN_ITEM_WITH_DETAILS.match(items[-1].lower()):
