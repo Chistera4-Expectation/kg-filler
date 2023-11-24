@@ -49,6 +49,7 @@ class AiQuery:
             model=self.model,
             max_tokens=self.limit,
             messages=[
+                {"role": "system", "content": "You're a dietician."},
                 {"role": "user", "content": self.question}
             ]
         )
