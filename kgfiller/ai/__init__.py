@@ -113,8 +113,8 @@ class AiQuery:
     def result_text(self) -> str:
         return unescape(self.result['choices'][0]['message']['content'])
     
-    def result_to_list(self, skip_first: bool = True, skip_last=True) -> typing.List[Item]:
-        return itemize(self.result_text, skip_first, skip_last)
+    def result_to_list(self) -> typing.List[Item]:
+        return itemize(self.result_text)
 
 
 def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
