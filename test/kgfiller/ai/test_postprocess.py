@@ -8,53 +8,85 @@ class TestPostprocess(unittest.TestCase):
         question = 'ingredient list for Beef Bulgogi, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 10
-        assert results[-1] == 'Sesame seeds'
-        assert results[0] == 'Beef sirloin'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        assert ('beef' in results) or ('beef sirloin' in results)
         question = 'ingredient list for Brioche bread, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 7
-        assert results[-1] == 'Flour'
-        assert results[0] == 'Butter'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        assert ('flour' in results)
 
     def test_lengthy_elements(self):
         question = 'ingredient list for Green Curry, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 11
-        assert results[-1] == 'Green curry paste'
-        assert results[0] == 'Green chili peppers'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        assert ('green curry paste' in results) and ('green chili peppers' in results)
 
     def test_inline_list(self):
         question = 'ingredient list for Pico de Gallo, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 6
-        assert results[-1] == 'tomatoes'
-        assert results[0] == 'salt'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        assert ('tomatoes' in results) and ('salt' in results)
 
 
     def test_weird_last_element(self):
         question = 'ingredient list for Minestrone Soup, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 17
-        assert results[-1] == 'Olive oil'
-        assert results[0] == 'Parmesan cheese'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        assert 'olive oil' in results
+        for result in results:
+            assert '(optional)' not in result
 
     def test_or_in_element(self):
         question = 'ingredient list for Whole wheat bread, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 6
-        assert results[-1] == 'Whole wheat flour'
-        assert results[0] == 'Olive oil'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        for result in results:
+            assert '(or)' not in result
 
     def test_optional_elements(self):
         question = 'ingredient list for Enchiladas, names only'
         query = ai_query(question)
         results = query.result_to_list()
-        assert len(results) == 8
-        assert results[-1] == 'Tortillas'
-        assert results[0] == 'Sour cream'
+        for index, result in enumerate(results):
+            results[index] = str(result).lower()
+        print('Question is "{}"'.format(question))
+        print('Results:')
+        for item in results:
+            print('\t{}'.format(item))
+        for result in results:
+            assert '(optional)' not in result

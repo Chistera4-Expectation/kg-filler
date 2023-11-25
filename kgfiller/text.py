@@ -33,10 +33,11 @@ class Item:
     def from_string(string: str) -> typing.List["Item"]:
         items = []
         for match in PATTERN_ITEM_WITH_PARENTHESES.finditer(string):
-            print(Item(match.group(1).strip(), match.group(2).strip()))
-            items.append(Item(match.group(1).strip(), match.group(2).strip()))
+            items.append(Item(match.group(1).strip()))
+        if '(' in string and ')' not in string:
+            items.append(Item(string.split('(')[0].strip()))
         for match in PATTERN_ITEM_WITH_DETAILS.finditer(string):
-            items.append(Item(match.group(1).strip(), match.group(2).strip()))
+            items.append(Item(match.group(1).strip()))
         if len(items) == 0:
             items.append(Item(string.strip()))
         return items
@@ -58,21 +59,19 @@ def str_hash(input: str, hash_function = 'sha256') -> str:
 
 def _listify_lines(text: str) -> typing.List[str]:
     items = PATTERN_LIST_ITEM.findall(text)
-    print(items[-1].lower().split()[-1])
-    print(wordnet.synsets(items[-1].lower().split()[-1]))
-    print(items[-1].lower())
-    print(PATTERN_ITEM_WITH_OR_OPTION.match(items[-1].lower()))
     if PATTERN_ITEM_WITH_PARENTHESES.match(items[-1].lower()):
-        items[-1] = items[-1].split('(')[0]
+        items[-1] = items[-1].split('(')[0].strip()
+    elif '(' in items[-1] and ')' not in items[-1]:
+        items[-1] = items[-1].split('(')[0].strip()
     elif PATTERN_ITEM_WITH_DETAILS.match(items[-1].lower()):
-        items[-1] = items[-1].split('-')[0].split(':')[0]
+        items[-1] = items[-1].split('-')[0].split(':')[0].strip()
     elif len(wordnet.synsets(items[-1].lower().split()[-1])) == 0:  
         items = items[:-1]
     else:
         pass
     for i in range(len(items)):
         if PATTERN_ITEM_WITH_OR_OPTION.match(items[i].lower()):
-            items[i] = items[i].split(' or ')[0]
+            items[i] = items[i].split(' or ')[0].strip()
     return items
 
 
