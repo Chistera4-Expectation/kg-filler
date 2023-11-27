@@ -1,40 +1,13 @@
-import os
 import pathlib
 import time
 import typing
 from dataclasses import dataclass
 
-import openai
 import yaml
 from lazy_property import LazyProperty
 
-from kgfiller import logger, PATH_DATA_DIR, unescape
+from kgfiller import logger, PATH_DATA_DIR
 from kgfiller.text import itemize, str_hash, Item
-
-
-openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else None
-if openai.api_key:
-    logger.debug("Loaded API key from environment variable OPENAI_API_KEY")
-else:
-    logger.warning("Environment variable OPENAI_API_KEY unset or empty")
-
-
-@dataclass
-class OpenAiStats:
-    total_api_calls: int = 0
-    total_tokens: int = 0
-
-    def plus(self, other: openai.ChatCompletion):
-        self.total_api_calls += 1
-        self.total_tokens += other.usage.total_tokens
-
-    def print(self, prefix: str = None):
-        if prefix:
-            print(prefix, end='')
-        print("total API calls:", self.total_api_calls, "total tokens:", self.total_tokens, flush=True)
-
-
-stats = OpenAiStats()
 
 
 @dataclass
@@ -43,29 +16,28 @@ class AiQuery:
     model: str
     limit: int
     attempt: int
+    background: str
 
-    def _chat_completion_step(self) -> openai.ChatCompletion:
-        result = openai.ChatCompletion.create(
-            model=self.model,
-            max_tokens=self.limit,
-            messages=[
-                {"role": "system", "content": "You're a dietician."},
-                {"role": "user", "content": self.question}
-            ]
-        )
-        stats.plus(result)
-        return result
+    def _chat_completion_step(self):
+        ...
+
+    @classmethod
+    def _limit_error(cls) -> typing.Type[Exception]:
+        ...
 
     @LazyProperty
-    def _chat_completion(self) -> openai.ChatCompletion:
+    def _chat_completion(self):
         timeout = 30  # seconds
         while True:
             try:
                 return self._chat_completion_step()
-            except openai.error.RateLimitError:
-                logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
-                time.sleep(timeout)
-                timeout *= 1.5
+            except Exception as e:
+                if isinstance(e, self._limit_error()):
+                    logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
+                    time.sleep(timeout)
+                    timeout *= 1.5
+                else:
+                    raise e
 
     @property
     def id(self):
@@ -79,6 +51,9 @@ class AiQuery:
         id = str_hash(self.id)
         return PATH_DATA_DIR / f"cache-{id}.yml"
 
+    def _chat_completion_to_yaml(self) -> str:
+        ...
+
     def _cache(self):
         overwrite = self.cache_path.exists()
         verb = "Overwriting cache of" if overwrite else "Caching"
@@ -87,7 +62,7 @@ class AiQuery:
             print(f"# Cache for query: {self.question}", file=f)
             print(f"# (model: {self.model}, limit: {self.limit}", end='', file=f)
             print(f", attempt: {self.attempt})" if self.attempt is not None else ')', file=f)
-            completion = yaml.safe_load(str(self._chat_completion))
+            completion = self._chat_completion_to_yaml()
             yaml.dump(completion, f)
 
     def _parse_cache(self) -> dict:
@@ -103,20 +78,35 @@ class AiQuery:
                 return None
 
     @property
-    def result(self) -> typing.Union[openai.ChatCompletion, dict]:
+    def result(self):
         if not self.cache_path.exists():
             self._cache()
             return self._chat_completion
         else:
             return self._parse_cache() or self._chat_completion
+
+    def _extract_text_from_result(self) -> str:
+        ...
         
     @property
     def result_text(self) -> str:
-        return unescape(self.result['choices'][0]['message']['content'])
+        return self._extract_text_from_result()
     
     def result_to_list(self) -> typing.List[Item]:
         return itemize(self.result_text)
 
 
-def ai_query(question: str, model: str = "gpt-3.5-turbo", limit: int = 100, attempt: int = None) -> AiQuery:
-    return AiQuery(question, model, limit, attempt)
+DEFAULT_API: type = None
+
+
+def ai_query(question: str, model: str = None, limit: int = 100, attempt: int = None, background: str = None, api: type = None) -> AiQuery:
+    if api is None:
+        global DEFAULT_API
+        api = DEFAULT_API
+    return api(
+        question=question,
+        model=model,
+        limit=limit,
+        attempt=attempt,
+        background=background
+    )

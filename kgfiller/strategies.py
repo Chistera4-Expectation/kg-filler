@@ -4,6 +4,7 @@ import owlready2 as owlready
 
 from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery
+import kgfiller.ai.openai   # do not remove this line
 from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
 from kgfiller.text import Item
 from kgfiller.utils import first_or_none
