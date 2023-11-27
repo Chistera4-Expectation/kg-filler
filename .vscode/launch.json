@@ -24,6 +24,14 @@
             "request": "launch",
             "module": "kgfiller",
             "justMyCode": true
+        },
+        {
+            "name": "kgfiller tests",
+            "type": "python",
+            "request": "launch",
+            "module": "unittest",
+            "justMyCode": true,
+            "args": ["discover", "-s", "tests"]
         }
     ]
 }
