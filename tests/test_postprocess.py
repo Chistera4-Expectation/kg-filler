@@ -1,4 +1,3 @@
-import tests
 import unittest
 from kgfiller.text import itemize
 
