@@ -24,7 +24,7 @@ else:
 
 
 @dataclass
-class OpenAiStats:
+class HuggingAiStats:
     total_api_calls: int = 0
     total_tokens: int = 0
 
@@ -38,7 +38,7 @@ class OpenAiStats:
         print("total API calls:", self.total_api_calls, "total tokens:", self.total_tokens, flush=True)
 
 
-stats = OpenAiStats()
+stats = HuggingAiStats()
 
 
 @dataclass
