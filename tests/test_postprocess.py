@@ -103,3 +103,56 @@ class TestItemize(unittest.TestCase):
         expected_items = ['Soy sauce', 'Brown sugar', 'Sesame oil', 'Garlic', 'Ginger', 'Green onions', 'Black pepper', 'Rice wine', 'Sesame seeds', 'beef']
         for index, result in enumerate(results):
             self.assertEqual(result.value, expected_items[index])
+
+    def test_and_in_item(self):
+        query_result = "1. beef\n2. oil\n3. salt and pepper"
+        results = itemize(query_result)
+        expected_items = ['beef', 'oil', 'salt', 'pepper']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+
+        query_result = "- beef\n-salt and pepper\n- oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+        
+        query_result = "beef and salt and black pepper and oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'black pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+    
+    def test_numbered_list_inline(self):
+        query_result = "1. beef 2. salt 3. black pepper 4. oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'black pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+
+        query_result = "possible ingredients can be: 1. beef 2. salt 3. black pepper 4. oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'black pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+
+    def test_special_symbol_list(self):
+        query_result = "> beef\n> oil\n> salt and pepper"
+        results = itemize(query_result)
+        expected_items = ['beef', 'oil', 'salt', 'pepper']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+
+        query_result = "o beef\no salt and pepper\no oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+        
+        query_result = "1 beef\n2 salt and pepper\n3 oil\n"
+        results = itemize(query_result)
+        expected_items = ['beef', 'salt', 'pepper', 'oil']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
+
+
