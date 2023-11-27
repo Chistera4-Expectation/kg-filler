@@ -1,8 +1,9 @@
+import tests
 import unittest
 from kgfiller.text import itemize
 
 
-class TestPostprocess(unittest.TestCase):
+class TestItemize(unittest.TestCase):
 
     def test_normal_output(self):
         query_result = "1. Flour\n\n2. Yeast\n\n3. Sugar\n\n4. Salt\n\n5. Eggs\n\n6. Milk\n\n7. Butter"
