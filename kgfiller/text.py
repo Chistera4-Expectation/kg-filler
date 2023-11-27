@@ -2,6 +2,8 @@ import hashlib
 import re
 import typing
 from dataclasses import dataclass
+import nltk
+nltk.download('wordnet')
 from nltk.corpus import wordnet
 
 PATTERN_INLINE_LIST_ITEM = re.compile(r"(?:,\s+(?:and\s+)?)?([^,.]+)", re.IGNORECASE)
