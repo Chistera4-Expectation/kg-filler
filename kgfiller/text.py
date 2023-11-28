@@ -1,7 +1,6 @@
 import hashlib
 import re
 import typing
-import enum
 from dataclasses import dataclass
 import nltk
 nltk.download('wordnet')
@@ -10,7 +9,8 @@ from nltk.corpus import wordnet
 
 PATTERN_BULLETED = re.compile(r"[-*+]|[#]+")
 PATTERN_NUMBERED = re.compile(r"\d+.")
-PATTERN_INLINE_LIST_ITEM = re.compile(r"(?:,\s+(?:and\s+)?)?([^,.]+)", re.IGNORECASE)
+PATTERN_INLINE_LIST_ITEM = re.compile(r"(\d+.|[-*+]|[#]+)\s*(.*?)(?=\d+.|[-*+]|[#]+|$)")
+PATTERN_INTEXT_LIST_ITEM = re.compile(r"(?:,\s+(?:and\s+)?)?([^,.]+)", re.IGNORECASE)
 PATTERN_LIST_ITEM = re.compile(r"^\n?(\d+.|[-*+]|[#]+)\s*(.*?)$", re.MULTILINE)
 PATTERN_ITEM_WITH_PARENTHESES = re.compile(r"(?:[,;])?(.+?)(?:\s+\((.+?)\))")
 PATTERN_ITEM_WITH_DETAILS = re.compile(r"(.+?)(?:(?:\s+-+\s+|:\s+)(.+))")
@@ -116,14 +116,15 @@ def _listify_lines(text: str) -> typing.List[typing.Tuple[str, str]]:
 def _listify_line(text: str) -> typing.List[typing.Tuple[str, str]]:
     items = []
     for match in PATTERN_INLINE_LIST_ITEM.finditer(text):
-        items.append(("", match.group(1).strip()))
+        items.append(match.groups())
+    if not items:
+        for match in PATTERN_INTEXT_LIST_ITEM.finditer(text):
+            items.append(("", match.group(1).strip()))
     return items
 
 
 def listify(text: str) -> typing.List[typing.Tuple[str, str]]:
     if "\n" in text:
-        return _listify_lines(text)
-    elif PATTERN_LIST_ITEM.fullmatch(text):
         return _listify_lines(text)
     else:
         return _listify_line(text)
@@ -137,6 +138,7 @@ def _itemize(text: str) -> typing.Iterable[Item]:
 
 
 def itemize(text: str) -> typing.List[Item]:
+    text = text.strip()
     items = list(_itemize(text))
     if len(items) >= 2 and items[0].prefix != items[1].prefix:
         items = items[1:]
