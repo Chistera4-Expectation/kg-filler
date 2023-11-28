@@ -10,7 +10,7 @@ from kgfiller import unescape
 import kgfiller.ai as ai
 
 DEFAULT_MODEL = "claude"
-DEFAULT_BACKGROUND = "You're a dietician."
+DEFAULT_BACKGROUND = "You're a dietician"
 
 
 @dataclass
@@ -53,11 +53,11 @@ class AnthropicAiQuery(ai.AiQuery):
     def _limit_error(cls) -> typing.Type[Exception]:
         return anthropic.APITimeoutError
 
-    def _chat_completion_to_yaml(self) -> str:
-        return yaml.safe_load(str(self._chat_completion))
+    def _chat_completion_to_dict(self, chat_completion) -> dict:
+        ...
 
-    def _extract_text_from_result(self) -> str:
-        return unescape(self.result)
+    def _extract_text_from_result(self, result) -> str:
+        return unescape(result)
 
 
 ai.DEFAULT_API = AnthropicAiQuery

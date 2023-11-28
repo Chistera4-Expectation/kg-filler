@@ -88,15 +88,15 @@ class HuggingAiQuery(ai.AiQuery):
     def _limit_error(cls) -> typing.Type[Exception]:
         return hugchat.exceptions.ModelOverloadedError
 
-    def _chat_completion_to_yaml(self) -> dict:
+    def _chat_completion_to_dict(self, chat_completion) -> dict:
         return {
-            'text': self.result.text,
-            'error': self.result.error,
-            'msg_status': self.result.msg_status,
+            'text': chat_completion.text,
+            'error': chat_completion.error,
+            'msg_status': chat_completion.msg_status,
         }
 
-    def _extract_text_from_result(self) -> str:
-        return _get_hugging_message_text(self.result)
+    def _extract_text_from_result(self, result) -> str:
+        return _get_hugging_message_text(result)
 
 
 ai.DEFAULT_API = HuggingAiQuery

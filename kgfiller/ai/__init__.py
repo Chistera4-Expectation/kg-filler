@@ -49,7 +49,7 @@ class AiQuery:
         id = str_hash(self.id)
         return PATH_DATA_DIR / f"cache-{id}.yml"
 
-    def _chat_completion_to_yaml(self) -> str:
+    def _chat_completion_to_dict(self, chat_completion) -> str:
         ...
 
     @property
@@ -60,11 +60,11 @@ class AiQuery:
         overwrite = self.cache_path.exists()
         verb = "Overwriting cache of" if overwrite else "Caching"
         logger.debug("%s query `%s` into file %s", verb, self, self.cache_path.absolute())
+        completion = self._chat_completion_to_dict(self._chat_completion)
         with open(self.cache_path, "w") as f:
             print(f"# Cache for query: {self.question}", file=f)
-            print(f"# (api: {self.api}, model: {self.model}, background: {self.background}, limit: {self.limit}", end='', file=f)
+            print(f"# (api: {self.api}, model: {self.model}, background: '{self.background}', limit: {self.limit}", end='', file=f)
             print(f", attempt: {self.attempt})" if self.attempt is not None else ')', file=f)
-            completion = self._chat_completion_to_yaml()
             yaml.dump(completion, f)
 
     def _parse_cache(self) -> dict:
@@ -87,12 +87,12 @@ class AiQuery:
         else:
             return self._parse_cache() or self._chat_completion
 
-    def _extract_text_from_result(self) -> str:
+    def _extract_text_from_result(self, result) -> str:
         ...
         
     @property
     def result_text(self) -> str:
-        return self._extract_text_from_result()
+        return self._extract_text_from_result(self.result)
     
     def result_to_list(self) -> typing.List[Item]:
         return itemize(self.result_text)
