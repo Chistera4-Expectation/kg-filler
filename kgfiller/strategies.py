@@ -3,12 +3,12 @@ import typing
 import owlready2 as owlready
 
 from kgfiller import logger, Commitable, Commit
-from kgfiller.ai import ai_query, AiQuery
-import kgfiller.ai.openai   # do not remove this line
+from kgfiller.ai import ai_query, AiQuery, load_api_from_env
 from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
 from kgfiller.text import Item
 from kgfiller.utils import first_or_none
 
+load_api_from_env()
 
 CLASS_NAME = "__CLASS_NAME__"
 CLASS_NAME_FANCY = "__CLASS_NAME_FANCY_"

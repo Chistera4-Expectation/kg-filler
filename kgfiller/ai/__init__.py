@@ -112,3 +112,21 @@ def ai_query(question: str, model: str = None, limit: int = 100, attempt: int = 
         attempt=attempt,
         background=background
     )
+
+
+def load_api_from_env(variable_name="API", default_api="almaai"):
+    import os
+    api = os.environ[variable_name] if variable_name in os.environ else default_api
+    if api == "almaai":
+        import kgfiller.ai.openai as api
+        api.almmai_endpoint()
+    elif api == "openai":
+        import kgfiller.ai.openai as api
+    elif api == "hugging":
+        import kgfiller.ai.hugging as api
+    elif api == "anthropic":
+        import kgfiller.ai.anthropic as api
+    else:
+        raise ValueError("Unknown API: " + api)
+    logger.debug(f"Using API: {api.__name__} from environment variable: {variable_name}")
+    return api
