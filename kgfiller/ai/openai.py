@@ -72,7 +72,7 @@ class OpenAiQuery(ai.AiQuery):
     def _limit_error(cls) -> typing.Type[Exception]:
         return openai.error.RateLimitError
 
-    def _chat_completion_to_yaml(self) -> str:
+    def _chat_completion_to_yaml(self) -> dict:
         return yaml.safe_load(str(self._chat_completion))
 
     def _extract_text_from_result(self) -> str:

@@ -1,10 +1,10 @@
 from kgfiller.ai import ai_query
-import kgfiller.ai.openai as openai
+import kgfiller.ai.hugging as hugging
 from kgfiller import enable_logging
 
 
 enable_logging()
-openai.almmai_endpoint()
+# openai.almmai_endpoint()
 
 
 while True:
@@ -13,6 +13,6 @@ while True:
         query = ai_query(question)
         print(query.result_text)
         print("> itemized results:", query.result_to_list())
-        openai.stats.print()
+        hugging.stats.print()
     except EOFError:
         break

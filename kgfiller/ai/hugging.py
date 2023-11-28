@@ -4,16 +4,13 @@ from dataclasses import dataclass
 
 from hugchat import hugchat
 from hugchat.login import Login
-import yaml
 
 from kgfiller import logger, unescape
 import kgfiller.ai as ai
 from tempfile import mkdtemp
 
-
-DEFAULT_MODEL = "hugging_mistral"
+DEFAULT_MODEL = "mistral"
 DEFAULT_BACKGROUND = "You're a dietician."
-
 
 username = os.environ['HUG_NAME'] if "HUG_NAME" in os.environ else "None"
 password = os.environ['HUG_PWD'] if "HUG_PWD" in os.environ else "None"
@@ -23,6 +20,14 @@ else:
     logger.warning("Environment variables HUG_NAME and HUG_PWD unset or empty")
 
 
+def _get_hugging_message_text(message: hugchat.Message) -> str:
+    if hasattr(message, 'text'):
+        return unescape(message.text)
+    elif isinstance(message, dict) and 'text' in message:
+        return unescape(message['text'])
+    else:
+        return unescape(str(message))
+
 
 @dataclass
 class HuggingAiStats:
@@ -31,7 +36,7 @@ class HuggingAiStats:
 
     def plus(self, other: hugchat.Message):
         self.total_api_calls += 1
-        self.total_tokens += other.text.count
+        self.total_tokens += len(_get_hugging_message_text(other).split())
 
     def print(self, prefix: str = None):
         if prefix:
@@ -57,38 +62,41 @@ class HuggingAiQuery(ai.AiQuery):
         sign.saveCookiesToDir(cookie_path_dir)
         return hugchat.ChatBot(cookies=cookies.get_dict())
 
+    def _new_conversation(self, chat_bot):
+        id = chat_bot.new_conversation()
+        chat_bot.change_conversation(id)
+
     def _select_llm(self, chat_bot):
-        chosen_model_index = None
-        for index, av_model in enumerate(chat_bot.get_available_llm_models()):
-            if self.model.split('_')[-1].lower() in av_model.name.lower():
-                chosen_model_index = index
-        if chosen_model_index is not None:
-            chat_bot.switch_llm(chosen_model_index)
+        candidates = [(index, model) for index, model in enumerate(chat_bot.get_available_llm_models())
+                      if self.model.lower() in model.name.lower()]
+        if candidates:
+            chat_bot.switch_llm(candidates[0][0])
+            self.model = candidates[0][1]
+        else:
+            logger.warning(f"Model ${self.model} not found, using default")
 
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
+        self._new_conversation(chat_bot)
         self._select_llm(chat_bot)
-        id = chat_bot.new_conversation()
-        chat_bot.change_conversation(id)
         result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
         result.wait_until_done()
+        stats.plus(result)
         return result
 
     @classmethod
     def _limit_error(cls) -> typing.Type[Exception]:
         return hugchat.exceptions.ModelOverloadedError
 
-    def _chat_completion_to_yaml(self) -> str:
-        # TODO @andagio dobbiamo guardarci insieme qui
-        return yaml.safe_load(str(self._chat_completion))
+    def _chat_completion_to_yaml(self) -> dict:
+        return {
+            'text': self.result.text,
+            'error': self.result.error,
+            'msg_status': self.result.msg_status,
+        }
 
     def _extract_text_from_result(self) -> str:
-        if 'mistral' in self.model:
-            return unescape(self.result)
-        elif 'falcon' in self.model:
-            return unescape(self.result['text'])
-        elif 'openchat' in self.model:
-            return unescape(self.result['text'])
+        return _get_hugging_message_text(self.result)
 
 
 ai.DEFAULT_API = HuggingAiQuery

@@ -6,7 +6,7 @@ import anthropic
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 import yaml
 
-from kgfiller import logger, unescape
+from kgfiller import unescape
 import kgfiller.ai as ai
 
 DEFAULT_MODEL = "claude"

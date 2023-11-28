@@ -41,10 +41,8 @@ class AiQuery:
 
     @property
     def id(self):
-        id = f"query#{self.question}#{self.model}#{self.limit}"
-        if self.attempt is not None:
-            id += f"#{self.attempt}"
-        return id
+        fields = [self.question, self.model, self.limit, self.background, self.api]
+        return "query#" + "#".join([str(f) for f in fields if f is not None])
 
     @LazyProperty
     def cache_path(self) -> pathlib.Path:
@@ -54,13 +52,17 @@ class AiQuery:
     def _chat_completion_to_yaml(self) -> str:
         ...
 
+    @property
+    def api(self):
+        return self.__class__.__name__
+
     def _cache(self):
         overwrite = self.cache_path.exists()
         verb = "Overwriting cache of" if overwrite else "Caching"
         logger.debug("%s query `%s` into file %s", verb, self, self.cache_path.absolute())
         with open(self.cache_path, "w") as f:
             print(f"# Cache for query: {self.question}", file=f)
-            print(f"# (model: {self.model}, limit: {self.limit}", end='', file=f)
+            print(f"# (api: {self.api}, model: {self.model}, background: {self.background}, limit: {self.limit}", end='', file=f)
             print(f", attempt: {self.attempt})" if self.attempt is not None else ')', file=f)
             completion = self._chat_completion_to_yaml()
             yaml.dump(completion, f)
@@ -77,7 +79,7 @@ class AiQuery:
                 self.cache_path.unlink()
                 return None
 
-    @property
+    @LazyProperty
     def result(self):
         if not self.cache_path.exists():
             self._cache()
