@@ -47,6 +47,29 @@ class HuggingAiStats:
 stats = HuggingAiStats()
 
 
+_cookies = None
+
+def _hugging_sign_in(username=username, password=password):
+    global _cookies
+    if _cookies is None:
+        sign = Login(username, password)
+        cookie_path_dir = mkdtemp("hugging-cookies")
+        sign.saveCookiesToDir(cookie_path_dir)
+        _cookies = sign.login()
+    return _cookies
+
+
+_chatbot = None
+
+
+def _hugging_chat_bot(username=username, password=password):
+    cookies = _hugging_sign_in(username, password)
+    global _chatbot
+    if _chatbot is None:
+        _chatbot = hugchat.ChatBot(cookies=cookies.get_dict())
+    return _chatbot
+
+
 class HuggingAiQuery(ai.AiQuery):
     def __init__(self, **kwargs):
         if "model" not in kwargs or kwargs["model"] is None:
@@ -56,11 +79,9 @@ class HuggingAiQuery(ai.AiQuery):
         super().__init__(**kwargs)
 
     def _create_chatbot(self):
-        sign = Login(username, password)
-        cookies = sign.login()
-        cookie_path_dir = mkdtemp("hugging-cookies")
-        sign.saveCookiesToDir(cookie_path_dir)
-        return hugchat.ChatBot(cookies=cookies.get_dict())
+        # cookies = _hugging_sign_in()
+        # return hugchat.ChatBot(cookies=cookies.get_dict())
+        return _hugging_chat_bot()
 
     def _new_conversation(self, chat_bot):
         id = chat_bot.new_conversation()
