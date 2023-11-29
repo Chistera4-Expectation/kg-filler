@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  openai-gpt35:
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: openai-gpt-3.5-turbo
+      API: openai
+
+  hugging-mistral:
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: mistral
+      API: hugging
+
+secrets:
+    all_secrets:
+        file: secrets.yml

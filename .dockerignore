@@ -1,0 +1,7 @@
+.venv/
+.vscode/
+.idea/
+*.pyc
+*secret*
+tests/
+*.yml

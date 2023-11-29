@@ -62,3 +62,36 @@ In this way, users may inspect the list of automatic additions to the ontology, 
     ```bash
     python -m kgfiller
     ```
+
+## Simplified workflow with Docker
+
+1. Ensure you have Docker and Docker Compose installed on your machine
+
+2. Create a `secrets.yml` file in the root of the project, with the following content:
+    ```yml
+    git:
+        user: Your name
+        email: Your email
+    github:
+        user: Your GitHub username
+        token: Your GitHub personal access token (with `repo` scope, at least)
+        data_repo: Chistera4-Expectation/kg-filler
+    hugging:
+        username: Your HuggingFace username
+        password: Your HuggingFace password
+    openai:
+        api_key: Your OpenAI API key
+    ```
+   
+3. Run the following command to start experiments
+   ```bash
+   docker-compose up [--build] [EXPERIMENT_NAME]
+   ```
+   
+   where:
+   - `--build` is optional, and forces the Docker image to be rebuilt
+   - `EXPERIMENT_NAME` is optional, and specifies the name of the experiment to run
+     (experiments names are the names of the services in the `docker-compose.yml` file)
+
+4. Experiments will be performed in parallel, and eventually pushed on the `github.data_repo` repository specified in `secrets.yml`.
+   Each experiment will be pushed onto a new branch, namely `experiment/EXPERIMENT_HASH`
