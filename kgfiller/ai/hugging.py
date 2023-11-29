@@ -9,8 +9,8 @@ from kgfiller import logger, unescape
 import kgfiller.ai as ai
 from tempfile import mkdtemp
 
-DEFAULT_MODEL = "mistral"
-DEFAULT_BACKGROUND = "You're a dietician."
+DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "mistral"
+DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
 username = os.environ['HUG_NAME'] if "HUG_NAME" in os.environ else "None"
 password = os.environ['HUG_PWD'] if "HUG_PWD" in os.environ else "None"
@@ -48,6 +48,7 @@ stats = HuggingAiStats()
 
 
 _cookies = None
+
 
 def _hugging_sign_in(username=username, password=password):
     global _cookies
@@ -100,6 +101,7 @@ class HuggingAiQuery(ai.AiQuery):
         chat_bot = self._create_chatbot()
         self._new_conversation(chat_bot)
         self._select_llm(chat_bot)
+        self._new_conversation(chat_bot)
         result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
         result.wait_until_done()
         stats.plus(result)

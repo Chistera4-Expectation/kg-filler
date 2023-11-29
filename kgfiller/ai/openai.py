@@ -9,9 +9,8 @@ from kgfiller import logger, unescape
 import kgfiller.ai as ai
 
 
-DEFAULT_MODEL = "gpt-3.5-turbo"
-DEFAULT_BACKGROUND = "You're a dietician."
-
+DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "gpt-3.5-turbo"
+DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
 openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else "None"
 if openai.api_key:
@@ -27,7 +26,7 @@ def change_endpoint(endpoint: str):
 def almmai_endpoint():
     change_endpoint("http://clusters.almaai.unibo.it:23231/v1")
     global DEFAULT_MODEL
-    DEFAULT_MODEL = "vicuna"
+    DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "vicuna"
 
 
 @dataclass

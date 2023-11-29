@@ -10,7 +10,7 @@ from kgfiller import unescape
 import kgfiller.ai as ai
 
 DEFAULT_MODEL = "claude"
-DEFAULT_BACKGROUND = "You're a dietician"
+DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
 
 @dataclass

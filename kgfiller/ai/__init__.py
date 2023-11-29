@@ -1,3 +1,4 @@
+import os
 import pathlib
 import time
 import typing
@@ -8,6 +9,9 @@ from lazy_property import LazyProperty
 
 from kgfiller import logger, PATH_DATA_DIR
 from kgfiller.text import itemize, str_hash, Item
+
+
+DEFAULT_BACKGROUND = os.environ['BACKGROUND'] if "BACKGROUND" in os.environ else "You're a dietician"
 
 
 @dataclass
