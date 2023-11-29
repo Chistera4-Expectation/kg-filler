@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  openai-gpt35:
+    build: .
+    secrets:
+      - gh_token
+      - hugging_username
+      - hugging_password
+      - openai_api_key
+    environment:
+      MODEL: openai-gpt-3.5-turbo
+      API: openai
+
+  hugging-mistral:
+    build: .
+    secrets:
+      - gh_token
+      - hugging_username
+      - hugging_password
+      - openai_api_key
+    environment:
+      MODEL: mistral
+      API: hugging
+
+secrets:
+    gh_token:
+        file: .secrets/gh_token.txt
+    hugging_username:
+        file: .secrets/hugging_username.txt
+    hugging_password:
+        file: .secrets/hugging_password.txt
+    openai_api_key:
+        file: .secrets/openai_api_key.txt
