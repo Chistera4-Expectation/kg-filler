@@ -26,7 +26,7 @@ class AiQuery:
         ...
 
     @classmethod
-    def _limit_error(cls) -> typing.Type[Exception]:
+    def _limit_error(cls) -> typing.Type[Exception] | typing.Iterable[typing.Type[Exception]]:
         ...
 
     @LazyProperty
@@ -36,7 +36,7 @@ class AiQuery:
             try:
                 return self._chat_completion_step()
             except Exception as e:
-                if isinstance(e, self._limit_error()):
+                if any(isinstance(e, t) for t in self._limit_error()):
                     logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
                     time.sleep(timeout)
                     timeout *= 1.5

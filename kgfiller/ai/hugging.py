@@ -12,12 +12,12 @@ from tempfile import mkdtemp
 DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "mistral"
 DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
-username = os.environ['HUG_NAME'] if "HUG_NAME" in os.environ else "None"
-password = os.environ['HUG_PWD'] if "HUG_PWD" in os.environ else "None"
+username = os.environ['HUGGING_USERNAME'] if "HUGGING_USERNAME" in os.environ else "None"
+password = os.environ['HUGGING_PASSWORD'] if "HUGGING_PASSWORD" in os.environ else "None"
 if username and password:
-    logger.debug("Loaded Hugging face account credentials from environment variable HUG_NAME and HUG_PWD")
+    logger.debug("Loaded Hugging credentials from environment variable HUGGING_USERNAME and HUGGING_PASSWORD")
 else:
-    logger.warning("Environment variables HUG_NAME and HUG_PWD unset or empty")
+    logger.warning("Environment variables HUGGING_USERNAME and HUGGING_PASSWORD unset or empty")
 
 
 def _get_hugging_message_text(message: hugchat.Message) -> str:
@@ -108,8 +108,8 @@ class HuggingAiQuery(ai.AiQuery):
         return result
 
     @classmethod
-    def _limit_error(cls) -> typing.Type[Exception]:
-        return hugchat.exceptions.ModelOverloadedError
+    def _limit_error(cls) -> typing.Iterable[typing.Type[Exception]]:
+        return hugchat.exceptions.ModelOverloadedError, hugchat.exceptions.ChatError
 
     def _chat_completion_to_dict(self, chat_completion) -> dict:
         return {
