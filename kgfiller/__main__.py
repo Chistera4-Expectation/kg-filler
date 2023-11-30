@@ -1,7 +1,8 @@
-from kgfiller import enable_logging
+from kgfiller import enable_logging, logger
 from kgfiller.git import DataRepository
 from kgfiller.kg import KnowledgeGraph, subtype, is_leaf
 from kgfiller.strategies import *
+from kgfiller.text import gather_possible_duplicates
 
 
 enable_logging()
@@ -22,6 +23,11 @@ recipe_queries = [
 
 rebalance_queries = [
     f"most adequate class for '{INSTANCE_NAME_FANCY}' among: {CLASS_LIST_FANCY}. concise",
+]
+
+
+duplicates_queries = [
+    f"are '{INSTANCE_LIST_FANCY}' duplicate instances of class {CLASS_NAME_FANCY}? yes or no answer only",
 ]
 
 
@@ -51,3 +57,12 @@ with DataRepository() as repo:
                         commit.should_commit = True
                         kg.save()
                         repo.maybe_commit(commit)
+        for cls in kg.visit_classes_depth_first():
+            if not is_leaf(cls) and not subtype(cls, Recipe):
+                possible_duplicates = gather_possible_duplicates(cls)
+                logger.debug('Possible duplicates in class "{}" are: {}'.format(cls, possible_duplicates))
+                for possible_duplicates_couple in possible_duplicates:
+                    logger.debug('Checking couple {}'.format(possible_duplicates_couple))
+                    commit = check_duplicates(kg, cls, possible_duplicates_couple, duplicates_queries)
+                    kg.save()
+                    repo.maybe_commit(commit)

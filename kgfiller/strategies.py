@@ -18,6 +18,8 @@ RELATION_NAME = "__RELATION_NAME__"
 RELATION_NAME_FANCY = "__RELATION_NAME_FANCY_"
 CLASS_LIST = "__CLASS_LIST__"
 CLASS_LIST_FANCY = "__CLASS_LIST_FANCY_"
+INSTANCE_LIST = "__INSTANCE_LIST__"
+INSTANCE_LIST_FANCY = "__INSTANCE_LIST_FANCY_"
 
 
 DEFAULT_MAX_RETRIES = 2
@@ -260,3 +262,42 @@ def move_to_most_adequate_subclass(kg: KnowledgeGraph,
                                    max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
     classes = subclass_selector(root_class)
     return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries)
+
+
+def check_duplicates(kg: KnowledgeGraph,
+                     cls: owlready.ThingClass,
+                     possible_duplicates: typing.Tuple[owlready.Thing,owlready.Thing],
+                     queries: typing.List[str],
+                     max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+    class CheckDuplicatesClassQueryProcessor(SingleResultQueryProcessor):
+
+        def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            if results:
+                return f"merged {possible_duplicates[0].name} and {possible_duplicates[1].name} together"
+            else:
+                return f"instances {possible_duplicates[0].name} and {possible_duplicates[1].name} were NOT merged together"
+
+        def parse_result(self, kg: KnowledgeGraph, query: AiQuery) -> typing.Any:
+            return query.result_text
+
+        def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
+            if 'yes' in result.lower():
+                self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are semantically identical.")
+                kg.merge_instances(possible_duplicates[0], possible_duplicates[1])
+                return True
+            else:
+                self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are different.")
+                return False
+
+    replacements = {
+        INSTANCE_LIST: set(),
+        INSTANCE_LIST_FANCY: set(),
+        CLASS_NAME: cls.name,
+        CLASS_NAME_FANCY: human_name(cls),
+    }
+    for instance in possible_duplicates:
+        replacements[INSTANCE_LIST].add(f"'{instance.name}'")
+        replacements[INSTANCE_LIST_FANCY].add(f"'{human_name(instance)}'")
+    replacements[INSTANCE_LIST] = ", ".join(replacements[INSTANCE_LIST])
+    replacements[INSTANCE_LIST_FANCY] = ", ".join(replacements[INSTANCE_LIST_FANCY])
+    return _make_queries(kg, queries, CheckDuplicatesClassQueryProcessor(), max_retries=max_retries, **replacements)

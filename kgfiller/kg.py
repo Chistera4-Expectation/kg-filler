@@ -118,6 +118,13 @@ class KnowledgeGraph:
         if self.onto.fancyName is not None and name != fancy_name:
             self.add_property(instance, "fancyName", fancy_name)
         return instance
+    
+    def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing):
+        for prop in instance2.get_properties():
+            prop_values = getattr(instance2, prop.name)
+            for value in prop_values:
+                self.add_property(instance1, prop, value)
+        owlready.destroy_entity(instance2)
 
     def visit_classes_depth_first(self, root: str | owlready.ThingClass | None = None, postorder=True) -> \
             typing.Iterable[owlready.ThingClass]:

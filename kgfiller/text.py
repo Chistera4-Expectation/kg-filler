@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import nltk
 nltk.download('wordnet')
 from nltk.corpus import wordnet
+import owlready2 as owlready
+from difflib import SequenceMatcher
 
 
 PATTERN_BULLETED = re.compile(r"[-*+]|[#]+")
@@ -144,3 +146,16 @@ def itemize(text: str) -> typing.List[Item]:
         items = items[1:]
     items = [item for item in items if item.is_meaningful()]
     return items
+
+
+def gather_possible_duplicates(cls: owlready.ThingClass) -> typing.List[typing.Tuple[owlready.Thing, owlready.Thing]]:
+    all_instances = cls.instances()
+    possible_duplicates = []
+    for instance1_index, instance1 in enumerate(all_instances):
+        for instance2 in all_instances[instance1_index+1:]:
+            first_name = instance1.name
+            second_name = instance2.name
+            match = SequenceMatcher(None, first_name, second_name).find_longest_match()
+            if match.size > 3:
+                possible_duplicates.append((instance1, instance2))
+    return possible_duplicates
