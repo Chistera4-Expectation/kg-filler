@@ -1,6 +1,6 @@
 from kgfiller import enable_logging
 from kgfiller.git import DataRepository
-from kgfiller.kg import KnowledgeGraph, subtype, is_leaf
+from kgfiller.kg import subtype
 from kgfiller.strategies import *
 
 

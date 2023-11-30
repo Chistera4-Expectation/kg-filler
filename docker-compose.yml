@@ -9,6 +9,7 @@ services:
     environment:
       MODEL: openai-gpt-3.5-turbo
       API: openai
+      # LIMIT: 100
 
   hugging-mistral:
     build: .
@@ -18,6 +19,7 @@ services:
     environment:
       MODEL: mistral
       API: hugging
+      # LIMIT: 100
 
 secrets:
     all_secrets:

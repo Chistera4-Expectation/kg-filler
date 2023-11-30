@@ -1,4 +1,3 @@
-import os
 import typing
 from dataclasses import dataclass
 
@@ -7,17 +6,14 @@ from hugchat.login import Login
 
 from kgfiller import logger, unescape
 import kgfiller.ai as ai
+from kgfiller.utils import get_env_var
 from tempfile import mkdtemp
 
-DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "mistral"
+DEFAULT_MODEL = get_env_var("MODEL", "mistral", "Hugging model")
 DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
-username = os.environ['HUGGING_USERNAME'] if "HUGGING_USERNAME" in os.environ else "None"
-password = os.environ['HUGGING_PASSWORD'] if "HUGGING_PASSWORD" in os.environ else "None"
-if username and password:
-    logger.debug("Loaded Hugging credentials from environment variable HUGGING_USERNAME and HUGGING_PASSWORD")
-else:
-    logger.warning("Environment variables HUGGING_USERNAME and HUGGING_PASSWORD unset or empty")
+username = get_env_var("HUGGING_USERNAME", "", "Hugging username")
+password = get_env_var("HUGGING_PASSWORD", "", "Hugging password")
 
 
 def _get_hugging_message_text(message: hugchat.Message) -> str:

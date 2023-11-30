@@ -1,4 +1,17 @@
 import typing
+import os
+from kgfiller import logger
+
+
+def get_env_var(name: str, default: str, description) -> str:
+    value = os.environ[name] if name in os.environ else None
+    if value:
+        logger.debug(f"Loaded {description} from environment variable {name}")
+    else:
+        logger.warning(f"Cannot load {description} because environment variable {name} is unset or empty. "
+                       f"Using default value: {default}")
+        value = default
+    return value
 
 
 def overlap(a: typing.Iterable, b: typing.Iterable) -> bool:
