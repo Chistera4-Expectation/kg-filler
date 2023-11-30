@@ -21,7 +21,7 @@ services:
       API: hugging
       # LIMIT: 100
 
-  hugging-almaai:
+  almaai-vicuna:
     build: .
     secrets:
       - source: all_secrets

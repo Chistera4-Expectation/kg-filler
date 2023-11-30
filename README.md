@@ -85,13 +85,15 @@ In this way, users may inspect the list of automatic additions to the ontology, 
    
 3. Run the following command to start experiments
    ```bash
-   docker-compose up [--build] [EXPERIMENT_NAME]
+   docker-compose up [--build] [-d] [EXPERIMENT_NAME]
    ```
    
    where:
+    - `-d` is optional, and runs the experiments in detached mode (i.e., in the background)
    - `--build` is optional, and forces the Docker image to be rebuilt
    - `EXPERIMENT_NAME` is optional, and specifies the name of the experiment to run
      (experiments names are the names of the services in the `docker-compose.yml` file)
+      * not specifying `EXPERIMENT_NAME` will run all experiments in parallel
 
 4. Experiments will be performed in parallel, and eventually pushed on the `github.data_repo` repository specified in `secrets.yml`.
    Each experiment will be pushed onto a new branch, namely `experiment/EXPERIMENT_HASH`, where `EXPERIMENT_HASH` is the 
