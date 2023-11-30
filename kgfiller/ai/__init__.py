@@ -9,9 +9,11 @@ from lazy_property import LazyProperty
 
 from kgfiller import logger, PATH_DATA_DIR
 from kgfiller.text import itemize, str_hash, Item
+from kgfiller.utils import get_env_var
 
 
-DEFAULT_BACKGROUND = os.environ['BACKGROUND'] if "BACKGROUND" in os.environ else "You're a dietician"
+DEFAULT_BACKGROUND = get_env_var("BACKGROUND", "You're a dietician", "AI background")
+DEFAULT_LIMIT = int(get_env_var("LIMIT", "100", "AI prompt limit"))
 
 
 @dataclass
@@ -36,7 +38,10 @@ class AiQuery:
             try:
                 return self._chat_completion_step()
             except Exception as e:
-                if any(isinstance(e, t) for t in self._limit_error()):
+                errors = self._limit_error()
+                if not isinstance(errors, typing.Iterable):
+                    errors = [errors]
+                if any(isinstance(e, t) for t in errors):
                     logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
                     time.sleep(timeout)
                     timeout *= 1.5
@@ -105,10 +110,11 @@ class AiQuery:
 DEFAULT_API: type = None
 
 
-def ai_query(question: str, model: str = None, limit: int = 100, attempt: int = None, background: str = None, api: type = None) -> AiQuery:
+def ai_query(question: str, model: str = None, limit: int = None, attempt: int = None, background: str = None, api: type = None) -> AiQuery:
     if api is None:
         global DEFAULT_API
         api = DEFAULT_API
+    limit = limit or DEFAULT_LIMIT
     return api(
         question=question,
         model=model,
@@ -119,8 +125,7 @@ def ai_query(question: str, model: str = None, limit: int = 100, attempt: int = 
 
 
 def load_api_from_env(variable_name="API", default_api="almaai"):
-    import os
-    api = os.environ[variable_name] if variable_name in os.environ else default_api
+    api = get_env_var(variable_name, default_api, "API type")
     if api == "almaai":
         import kgfiller.ai.openai as api
         api.almmai_endpoint()

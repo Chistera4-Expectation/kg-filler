@@ -1,22 +1,18 @@
-import os
 import typing
 from dataclasses import dataclass
 
 import openai
 import yaml
 
-from kgfiller import logger, unescape
+from kgfiller import unescape
 import kgfiller.ai as ai
+from kgfiller.utils import get_env_var
 
 
-DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "gpt-3.5-turbo"
+DEFAULT_MODEL = get_env_var("MODEL", "gpt-3.5-turbo", "OpenAI model")
 DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
 
-openai.api_key = os.environ["OPENAI_API_KEY"] if "OPENAI_API_KEY" in os.environ else "None"
-if openai.api_key:
-    logger.debug("Loaded API key from environment variable OPENAI_API_KEY")
-else:
-    logger.warning("Environment variable OPENAI_API_KEY unset or empty")
+openai.api_key = get_env_var("OPENAI_API_KEY", "null", "OpenAI API key")
 
 
 def change_endpoint(endpoint: str):
@@ -26,7 +22,7 @@ def change_endpoint(endpoint: str):
 def almmai_endpoint():
     change_endpoint("http://clusters.almaai.unibo.it:23231/v1")
     global DEFAULT_MODEL
-    DEFAULT_MODEL = os.environ['MODEL'] if "MODEL" in os.environ else "vicuna"
+    DEFAULT_MODEL = get_env_var("MODEL", "vicuna", "OpenAI model")
 
 
 @dataclass

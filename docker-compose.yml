@@ -4,31 +4,33 @@ services:
   openai-gpt35:
     build: .
     secrets:
-      - gh_token
-      - hugging_username
-      - hugging_password
-      - openai_api_key
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
     environment:
-      MODEL: openai-gpt-3.5-turbo
+      MODEL: gpt-3.5-turbo
       API: openai
+      # LIMIT: 100
 
   hugging-mistral:
     build: .
     secrets:
-      - gh_token
-      - hugging_username
-      - hugging_password
-      - openai_api_key
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
     environment:
       MODEL: mistral
       API: hugging
+      # LIMIT: 100
+
+  almaai-vicuna:
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: vicuna
+      API: almaai
+      # LIMIT: 100
 
 secrets:
-    gh_token:
-        file: .secrets/gh_token.txt
-    hugging_username:
-        file: .secrets/hugging_username.txt
-    hugging_password:
-        file: .secrets/hugging_password.txt
-    openai_api_key:
-        file: .secrets/openai_api_key.txt
+    all_secrets:
+        file: secrets.yml

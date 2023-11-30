@@ -70,6 +70,11 @@ class Prefix:
         return hash((self.is_empty, self.is_bulleted, self.is_numbered))
 
 
+def _last_word(text: str) -> str:
+    if text:
+        return text.split()[-1]
+    return ""
+
 @dataclass
 class Item:
     value: str
@@ -91,7 +96,7 @@ class Item:
         return items
     
     def is_meaningful(self) -> bool:
-        return _is_meaningful_word(self.value.split()[-1])
+        return _is_meaningful_word(_last_word(self.value))
     
     def split_by_words(self, words: typing.Iterable[str] = None) -> typing.List[str]:
         if words is None:
@@ -136,7 +141,9 @@ def _itemize(text: str) -> typing.Iterable[Item]:
     for prefix_item in listify(text):
         for item in Item.from_string(*prefix_item):
             for word in item.split_by_words():
-                yield Item(value=word, prefix=item.prefix)
+                word = word.strip()
+                if word:
+                    yield Item(value=word, prefix=item.prefix)
 
 
 def itemize(text: str) -> typing.List[Item]:
