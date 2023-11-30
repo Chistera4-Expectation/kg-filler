@@ -38,7 +38,10 @@ class AiQuery:
             try:
                 return self._chat_completion_step()
             except Exception as e:
-                if any(isinstance(e, t) for t in self._limit_error()):
+                errors = self._limit_error()
+                if not isinstance(errors, typing.Iterable):
+                    errors = [errors]
+                if any(isinstance(e, t) for t in errors):
                     logger.warning("Rate limit exceeded, retrying in %.2g seconds", timeout)
                     time.sleep(timeout)
                     timeout *= 1.5
