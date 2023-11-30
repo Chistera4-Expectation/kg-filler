@@ -4,6 +4,14 @@ function get_secret() {
     yq -r .$1 $SECRETS_PATH
 }
 
+function restore_all_caches() {
+    git fetch --all
+    for BRANCH in $(git branch -r | tail -n +2 | cut -c 3-); do
+        git checkout $BRANCH -- '*.yml'
+        git reset *.yml
+    done
+}
+
 # configure git user locally
 git config --global user.name $(get_secret git.user)
 git config --global user.email $(get_secret git.email)
@@ -31,6 +39,8 @@ pushd data
 git remote set-url origin "https://github.com/$GH_REPO"
 # create a new branch for this experiment
 git checkout -b $BRANCH
+# restore all the yaml files from all branches
+restore_all_caches
 popd
 
 # run the kg-filler
