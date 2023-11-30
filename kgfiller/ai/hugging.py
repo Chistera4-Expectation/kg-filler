@@ -8,6 +8,7 @@ from kgfiller import logger, unescape
 import kgfiller.ai as ai
 from kgfiller.utils import get_env_var
 from tempfile import mkdtemp
+from functools import cache
 
 DEFAULT_MODEL = get_env_var("MODEL", "mistral", "Hugging model")
 DEFAULT_BACKGROUND = ai.DEFAULT_BACKGROUND
@@ -42,7 +43,6 @@ class HuggingAiStats:
 
 stats = HuggingAiStats()
 
-
 _cookies = None
 
 
@@ -67,6 +67,13 @@ def _hugging_chat_bot(username=username, password=password):
     return _chatbot
 
 
+@cache
+def _hugging_get_available_models(chat_bot):
+    result = [model.name for model in chat_bot.get_available_llm_models()]
+    logger.debug(f"Discovered available models for chatbot {id(chat_bot)}: {result}")
+    return result
+
+
 class HuggingAiQuery(ai.AiQuery):
     def __init__(self, **kwargs):
         if "model" not in kwargs or kwargs["model"] is None:
@@ -85,19 +92,21 @@ class HuggingAiQuery(ai.AiQuery):
         chat_bot.change_conversation(id)
 
     def _select_llm(self, chat_bot):
-        candidates = [(index, model) for index, model in enumerate(chat_bot.get_available_llm_models())
-                      if self.model.lower() in model.name.lower()]
-        if candidates:
-            chat_bot.switch_llm(candidates[0][0])
-            self.model = candidates[0][1]
-        else:
-            logger.warning(f"Model ${self.model} not found, using default")
+        if self.model != chat_bot.active_model.name:
+            self._new_conversation(chat_bot)
+            models = _hugging_get_available_models(chat_bot)
+            candidates = [(index, model) for index, model in enumerate(models) if self.model.lower() in model.lower()]
+            if candidates:
+                chat_bot.switch_llm(candidates[0][0])
+                self.model = candidates[0][1]
+                logger.debug(f"Selected model {self.model} for chatbot ${id(chat_bot)}")
+            else:
+                logger.warning(f"Model {self.model} not found, using default")
+            self._new_conversation(chat_bot)
 
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
-        self._new_conversation(chat_bot)
         self._select_llm(chat_bot)
-        self._new_conversation(chat_bot)
         result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
         result.wait_until_done()
         stats.plus(result)
