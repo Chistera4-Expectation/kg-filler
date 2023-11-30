@@ -21,6 +21,16 @@ services:
       API: hugging
       # LIMIT: 100
 
+  hugging-almaai:
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: vicuna
+      API: almaai
+      # LIMIT: 100
+
 secrets:
     all_secrets:
         file: secrets.yml

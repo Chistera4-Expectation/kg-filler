@@ -94,4 +94,6 @@ In this way, users may inspect the list of automatic additions to the ontology, 
      (experiments names are the names of the services in the `docker-compose.yml` file)
 
 4. Experiments will be performed in parallel, and eventually pushed on the `github.data_repo` repository specified in `secrets.yml`.
-   Each experiment will be pushed onto a new branch, namely `experiment/EXPERIMENT_HASH`
+   Each experiment will be pushed onto a new branch, namely `experiment/EXPERIMENT_HASH`, where `EXPERIMENT_HASH` is the 
+   ID of the experiment's container, that one may discover via `docker ps`
+   
