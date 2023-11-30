@@ -75,7 +75,7 @@ In this way, users may inspect the list of automatic additions to the ontology, 
     github:
         user: Your GitHub username
         token: Your GitHub personal access token (with `repo` scope, at least)
-        data_repo: Chistera4-Expectation/kg-filler
+        data_repo: Chistera4-Expectation/knowledge-graphs
     hugging:
         username: Your HuggingFace username
         password: Your HuggingFace password
