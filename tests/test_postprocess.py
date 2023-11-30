@@ -155,4 +155,9 @@ class TestItemize(unittest.TestCase):
         for index, result in enumerate(results):
             self.assertEqual(result.value, expected_items[index])
 
-
+    def test_interrupted_output(self):
+        query_result = "1. Marinara sauce\n2. Alfredo sauce\n3"
+        results = itemize(query_result)
+        expected_items = ['Marinara sauce', 'Alfredo sauce']
+        for index, result in enumerate(results):
+            self.assertEqual(result.value, expected_items[index])
