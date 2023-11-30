@@ -7,7 +7,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      MODEL: openai-gpt-3.5-turbo
+      MODEL: gpt-3.5-turbo
       API: openai
       # LIMIT: 100
 
