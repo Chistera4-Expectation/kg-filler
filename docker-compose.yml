@@ -49,6 +49,18 @@ services:
       API: hugging
       # LIMIT: 100
 
+  hugging-llama:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      ONTO: food
+      MODEL: llama-2
+      API: hugging
+      # LIMIT: 100
+
   almaai-vicuna:
     platform: linux/amd64
     build: .
