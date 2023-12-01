@@ -118,7 +118,11 @@ class KnowledgeGraph:
             self.add_property(instance, "fancyName", fancy_name)
         return instance
     
-    def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing):
+    def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing, cls: owlready.ThingClass) -> bool:
+        all_instances = [inst for inst in cls.instances()]
+        if not (instance1 in all_instances) or not (instance2 in all_instances):
+            logger.debug('Instance "{}" has been already removed previously...'.format(instance1))
+            return False
         logger.debug("Merging instances '{}' and '{}'".format(instance1, instance2))
         for prop in instance2.get_properties():
             if prop.name != 'fancyName':
@@ -130,6 +134,7 @@ class KnowledgeGraph:
                     self.add_property(instance1, prop.name, value)
         logger.debug("Destroying instance '{}'".format(instance2))
         owlready.destroy_entity(instance2)
+        return True
 
     def visit_classes_depth_first(self, root: str | owlready.ThingClass | None = None, postorder=True) -> \
             typing.Iterable[owlready.ThingClass]:

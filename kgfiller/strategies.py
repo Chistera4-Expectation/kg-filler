@@ -283,8 +283,10 @@ def check_duplicates(kg: KnowledgeGraph,
         def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
             if 'yes' in result.lower():
                 self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are semantically identical.")
-                kg.merge_instances(possible_duplicates[0], possible_duplicates[1])
-                return True
+                merge_outcome = kg.merge_instances(possible_duplicates[0], possible_duplicates[1], cls)
+                if not merge_outcome:
+                    self.describe(f"instances not merged cause at least one was already merged previously.")
+                return merge_outcome
             else:
                 self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are different.")
                 return False
