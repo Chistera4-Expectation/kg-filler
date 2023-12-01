@@ -3,32 +3,16 @@ from kgfiller.git import DataRepository
 from kgfiller.kg import subtype
 from kgfiller.strategies import *
 from kgfiller.text import gather_possible_duplicates
+from kgfiller.utils import load_queries_json
 
 
 enable_logging()
 
-
-instance_queries = [
-    f"instances list for class {CLASS_NAME_FANCY}, names only",
-    f"instances list for class {CLASS_NAME_FANCY}",
-    f"examples list for {CLASS_NAME_FANCY}, names only",
-    f"examples list for {CLASS_NAME_FANCY}",
-]
-
-
-recipe_queries = [
-    f"ingredient list for {INSTANCE_NAME_FANCY}, names only",
-]
-
-
-rebalance_queries = [
-    f"most adequate class for '{INSTANCE_NAME_FANCY}' among: {CLASS_LIST_FANCY}. concise",
-]
-
-
-duplicates_queries = [
-    f"are '{INSTANCE_LIST_FANCY}' duplicate instances of class {CLASS_NAME_FANCY}? yes or no answer only",
-]
+queries = load_queries_json()
+instance_queries = queries['instance']
+recipe_queries = queries['recipe']
+rebalance_queries = queries['rebalance']
+duplicates_queries = queries['duplicate']
 
 
 with DataRepository() as repo:

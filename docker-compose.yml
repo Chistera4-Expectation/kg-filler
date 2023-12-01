@@ -8,6 +8,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      ONTO: food
       MODEL: gpt-3.5-turbo
       API: openai
       # LIMIT: 100
@@ -19,6 +20,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      ONTO: food
       MODEL: mistral
       API: hugging
       # LIMIT: 100
@@ -30,6 +32,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      ONTO: food
       MODEL: falcon
       API: hugging
       # LIMIT: 100
@@ -41,6 +44,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      ONTO: food
       MODEL: openchat
       API: hugging
       # LIMIT: 100
@@ -52,6 +56,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      ONTO: food
       MODEL: vicuna
       API: almaai
       # LIMIT: 100
