@@ -173,6 +173,11 @@ def find_instances_for_recipes(kg: KnowledgeGraph,
                              queries: typing.List[str],
                              max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
     class FindInstancesQueryProcessor(MultipleResultsQueryProcessor):
+
+        def admissible(self, kg: KnowledgeGraph, query: AiQuery) -> bool:
+            self._results = query.result_to_list(ignore_ands=True)
+            return len(self._results) > 0
+
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
             return f"add {len(results)} instances to class {cls.name} from AI answer"
 
