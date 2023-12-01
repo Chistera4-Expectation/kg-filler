@@ -11,6 +11,7 @@ services:
       ONTO: food
       MODEL: gpt-3.5-turbo
       API: openai
+      N_RECIPES: 50
       # LIMIT: 100
 
   hugging-mistral:
@@ -23,6 +24,7 @@ services:
       ONTO: food
       MODEL: mistral
       API: hugging
+      N_RECIPES: 50
       # LIMIT: 100
 
   hugging-falcon:
@@ -35,6 +37,7 @@ services:
       ONTO: food
       MODEL: falcon
       API: hugging
+      N_RECIPES: 50
       # LIMIT: 100
 
   hugging-openchat:
@@ -47,6 +50,7 @@ services:
       ONTO: food
       MODEL: openchat
       API: hugging
+      N_RECIPES: 50
       # LIMIT: 100
 
   hugging-llama:
@@ -59,6 +63,7 @@ services:
       ONTO: food
       MODEL: llama-2
       API: hugging
+      N_RECIPES: 50
       # LIMIT: 100
 
   almaai-vicuna:
@@ -71,6 +76,7 @@ services:
       ONTO: food
       MODEL: vicuna
       API: almaai
+      N_RECIPES: 50
       # LIMIT: 100
 
 secrets:

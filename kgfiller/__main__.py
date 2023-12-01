@@ -11,6 +11,7 @@ enable_logging()
 queries = load_queries_json()
 instance_queries = queries['instance']
 recipe_queries = queries['recipe']
+relation_queries = queries['relation']
 rebalance_queries = queries['rebalance']
 duplicates_queries = queries['duplicate']
 
@@ -19,11 +20,15 @@ with DataRepository() as repo:
     with KnowledgeGraph() as kg:
         Recipe = kg.onto.Recipe
         for cls in kg.visit_classes_depth_first():
-            commit = find_instances_for_class(kg, cls, instance_queries)
-            kg.save()
-            repo.maybe_commit(commit)
+            if not subtype(cls, Recipe):
+                commit = find_instances_for_class(kg, cls, instance_queries)
+                kg.save()
+                repo.maybe_commit(commit)
+        commit = find_instances_for_recipes(kg, Recipe, recipe_queries)
+        kg.save()
+        repo.maybe_commit(commit)
         for instance in kg.onto.Recipe.instances():
-            commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, recipe_queries, instance_as_object=True)
+            commit = find_related_instances(kg, instance, kg.onto.ingredientOf, kg.onto.Edible, relation_queries, instance_as_object=True)
             kg.save()
             repo.maybe_commit(commit)
         already_met_instances = set()

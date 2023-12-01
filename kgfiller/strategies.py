@@ -6,7 +6,7 @@ from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery, load_api_from_env
 from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
 from kgfiller.text import Item
-from kgfiller.utils import first_or_none
+from kgfiller.utils import first_or_none, get_env_var
 
 load_api_from_env()
 
@@ -23,6 +23,8 @@ INSTANCE_LIST_FANCY = "__INSTANCE_LIST_FANCY_"
 
 
 DEFAULT_MAX_RETRIES = 2
+DEFAULT_LIMIT = int(get_env_var("LIMIT", "100", "AI prompt limit"))
+N_RECIPES = get_env_var("N_RECIPES", "50", "Number of recipes to query for")
 
 
 def _apply_replacements(pattern: str, **replacements) -> str:
@@ -131,12 +133,13 @@ def _make_queries(kg: KnowledgeGraph,
                   queries: typing.List[str],
                   query_processor: QueryProcessor,
                   max_retries: int,
+                  limit: int = DEFAULT_LIMIT,
                   **replacements) -> Commitable:
     questions = [_apply_replacements(pattern, **replacements) for pattern in queries]
     query_processor.reset(kg)
     for question in questions:
         for attempt in range(0, max_retries):
-            query = ai_query(question=question, attempt=attempt if attempt > 0 else None)
+            query = ai_query(question=question, attempt=attempt if attempt > 0 else None, limit=limit)
             if not query_processor(query):
                 logger.warning("No results for query '%s', AI answer: %s", query.question, query.result_text)
                 continue
@@ -164,6 +167,25 @@ def find_instances_for_class(kg: KnowledgeGraph,
         CLASS_NAME_FANCY: human_name(cls),
     }
     return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, **replacements)
+
+def find_instances_for_recipes(kg: KnowledgeGraph,
+                             cls: owlready.ThingClass,
+                             already_added_instances: typing.List[owlready.Thing],
+                             queries: typing.List[str],
+                             max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+    class FindInstancesQueryProcessor(MultipleResultsQueryProcessor):
+        def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            return f"add {len(results)} instances to class {cls.name} from AI answer"
+
+        def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: Item):
+            instance = kg.add_instance(cls, result.value)
+            self.describe(f"- {result} => adding instance {instance.name} to class {cls.name}")
+            return instance
+
+    replacements = {
+        '__N_RECIPES_': N_RECIPES
+    }
+    return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, limit=1000, **replacements)
 
 
 def find_related_instances(kg: KnowledgeGraph,
