@@ -170,7 +170,6 @@ def find_instances_for_class(kg: KnowledgeGraph,
 
 def find_instances_for_recipes(kg: KnowledgeGraph,
                              cls: owlready.ThingClass,
-                             already_added_instances: typing.List[owlready.Thing],
                              queries: typing.List[str],
                              max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
     class FindInstancesQueryProcessor(MultipleResultsQueryProcessor):
