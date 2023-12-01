@@ -119,10 +119,16 @@ class KnowledgeGraph:
         return instance
     
     def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing):
+        logger.debug("Merging instances '{}' and '{}'".format(instance1, instance2))
         for prop in instance2.get_properties():
-            prop_values = getattr(instance2, prop.name)
-            for value in prop_values:
-                self.add_property(instance1, prop, value)
+            if prop.name != 'fancyName':
+                prop_values = getattr(instance2, prop.name)
+                for value in prop_values:
+                    logger.debug("Cloning property named '{}' of instance '{}' "
+                                 "into instance '{}' with value '{}'".format(prop.name, instance2, 
+                                                                         instance1, value))
+                    self.add_property(instance1, prop.name, value)
+        logger.debug("Destroying instance '{}'".format(instance2))
         owlready.destroy_entity(instance2)
 
     def visit_classes_depth_first(self, root: str | owlready.ThingClass | None = None, postorder=True) -> \
