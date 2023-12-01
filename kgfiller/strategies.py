@@ -298,6 +298,6 @@ def check_duplicates(kg: KnowledgeGraph,
     for instance in possible_duplicates:
         replacements[INSTANCE_LIST].add(f"'{instance.name}'")
         replacements[INSTANCE_LIST_FANCY].add(f"'{human_name(instance)}'")
-    replacements[INSTANCE_LIST] = ", ".join(replacements[INSTANCE_LIST])
-    replacements[INSTANCE_LIST_FANCY] = ", ".join(replacements[INSTANCE_LIST_FANCY])
+    replacements[INSTANCE_LIST] = " and ".join(replacements[INSTANCE_LIST])
+    replacements[INSTANCE_LIST_FANCY] = " and ".join(replacements[INSTANCE_LIST_FANCY])
     return _make_queries(kg, queries, CheckDuplicatesClassQueryProcessor(), max_retries=max_retries, **replacements)
