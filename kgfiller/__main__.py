@@ -47,7 +47,7 @@ with DataRepository() as repo:
                         kg.save()
                         repo.maybe_commit(commit)
         for cls in kg.visit_classes_depth_first():
-            if not is_leaf(cls) and not subtype(cls, Recipe):
+            if not subtype(cls, Recipe):
                 possible_duplicates = gather_possible_duplicates(cls)
                 logger.debug('Possible duplicates in class "{}" are: {}'.format(cls, possible_duplicates))
                 for possible_duplicates_couple in possible_duplicates:
