@@ -110,6 +110,7 @@ class HuggingAiQuery(ai.AiQuery):
         result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
         result.wait_until_done()
         stats.plus(result)
+        chat_bot.delete_all_conversations()
         return result
 
     @classmethod
