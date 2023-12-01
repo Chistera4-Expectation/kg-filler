@@ -110,7 +110,11 @@ class HuggingAiQuery(ai.AiQuery):
         result = chat_bot.query(self.question, truncate=self.limit)
         result.wait_until_done()
         stats.plus(result)
-        chat_bot.delete_all_conversations()
+        try:
+            chat_bot.delete_all_conversations()
+        except hugchat.exceptions.DeleteConversationError as e:
+            logger.warning('Unable to delete all conversations with error {}. '
+                           'Trying to delete them next time...'.format(e))
         return result
 
     @classmethod
