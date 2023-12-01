@@ -1,7 +1,8 @@
 version: "3.9"
 
-services:
+services:  
   openai-gpt35:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
@@ -12,6 +13,7 @@ services:
       # LIMIT: 100
 
   hugging-mistral:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
@@ -21,7 +23,30 @@ services:
       API: hugging
       # LIMIT: 100
 
+  hugging-falcon:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: falcon
+      API: hugging
+      # LIMIT: 100
+
+  hugging-openchat:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      MODEL: openchat
+      API: hugging
+      # LIMIT: 100
+
   almaai-vicuna:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
