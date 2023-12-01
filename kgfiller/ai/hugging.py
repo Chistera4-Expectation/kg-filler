@@ -88,7 +88,7 @@ class HuggingAiQuery(ai.AiQuery):
         return _hugging_chat_bot()
 
     def _new_conversation(self, chat_bot):
-        id = chat_bot.new_conversation()
+        id = chat_bot.new_conversation(system_prompt=self.background)
         chat_bot.change_conversation(id)
 
     def _select_llm(self, chat_bot):
@@ -107,7 +107,7 @@ class HuggingAiQuery(ai.AiQuery):
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
         self._select_llm(chat_bot)
-        result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
+        result = chat_bot.query(self.question, truncate=self.limit)
         result.wait_until_done()
         stats.plus(result)
         chat_bot.delete_all_conversations()
