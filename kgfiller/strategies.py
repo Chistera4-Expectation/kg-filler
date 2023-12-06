@@ -305,17 +305,24 @@ def check_duplicates(kg: KnowledgeGraph,
 
         def parse_result(self, kg: KnowledgeGraph, query: AiQuery) -> typing.Any:
             return query.result_text
+        
+        def admissible(self, kg: KnowledgeGraph, query: AiQuery) -> bool:
+            self._result = self.parse_result(kg, query)
+            return self._result is not None and query.question not in self._result
 
         def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
+            logger.debug('Query:\t{}\nAnswer:\t{}'.format(query.question, query.result_text))
             if 'yes' in result.lower():
                 self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are semantically identical.")
                 merge_outcome = kg.merge_instances(possible_duplicates[0], possible_duplicates[1], cls)
                 if not merge_outcome:
                     self.describe(f"instances not merged cause at least one was already merged previously.")
                 return merge_outcome
-            else:
+            elif 'no' in result.lower():
                 self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are different.")
                 return False
+            else:
+                logger.warning('Answer to instance merge query does not contain YES or NO!')
 
     replacements = {
         INSTANCE_LIST: set(),
