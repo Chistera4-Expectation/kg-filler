@@ -102,7 +102,17 @@ class HuggingAiQuery(ai.AiQuery):
                 logger.debug(f"Selected model {self.model} for chatbot ${id(chat_bot)}")
             else:
                 logger.warning(f"Model {self.model} not found, using default")
-            self._new_conversation(chat_bot)
+        self._new_conversation(chat_bot)
+
+    def close_conversations(self, chat_bot):
+        try:
+            conversations = chat_bot.get_conversation_list()
+            for conversation in conversations:
+                if conversation != chat_bot.current_conversation:
+                    chat_bot.delete_conversation(conversation)
+        except hugchat.exceptions.DeleteConversationError as e:
+            logger.warning('Unable to delete all conversations with error {}. '
+                           'Trying to delete them next time...'.format(e))
 
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
@@ -111,11 +121,7 @@ class HuggingAiQuery(ai.AiQuery):
         result.wait_until_done()
         logger.debug('result from hugging query: {}'.format(result))
         stats.plus(result)
-        try:
-            chat_bot.delete_all_conversations()
-        except hugchat.exceptions.DeleteConversationError as e:
-            logger.warning('Unable to delete all conversations with error {}. '
-                           'Trying to delete them next time...'.format(e))
+        self.close_conversations(chat_bot)
         return result
 
     @classmethod
