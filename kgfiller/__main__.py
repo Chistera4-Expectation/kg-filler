@@ -1,12 +1,10 @@
-from kgfiller import enable_logging, logger
+from kgfiller import logger
 from kgfiller.git import DataRepository
 from kgfiller.kg import subtype
 from kgfiller.strategies import *
 from kgfiller.text import gather_possible_duplicates
 from kgfiller.utils import load_queries_json
 
-
-enable_logging()
 
 queries = load_queries_json()
 instance_queries = queries['instance']

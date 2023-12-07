@@ -4,7 +4,7 @@ import owlready2 as owlready
 import unidecode
 from lazy_property import LazyProperty
 
-from kgfiller import PATH_DATA_DIR, replace_symbols_with
+from kgfiller import PATH_DATA_DIR, replace_symbols_with, logger
 from kgfiller.utils import *
 
 PATH_ONTOLOGY = PATH_DATA_DIR / "ontology.owl"

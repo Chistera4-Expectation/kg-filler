@@ -2,7 +2,6 @@ import typing
 import os
 import pathlib
 import json
-from kgfiller import logger
 
 
 PATH_REPO = pathlib.Path(__file__).parent.parent
@@ -10,10 +9,10 @@ PATH_REPO = pathlib.Path(__file__).parent.parent
 def get_env_var(name: str, default: str, description) -> str:
     value = os.environ[name] if name in os.environ else None
     if value:
-        logger.debug(f"Loaded {description} from environment variable {name}")
+        print(f"Loaded {description} from environment variable {name}")
     else:
-        logger.warning(f"Cannot load {description} because environment variable {name} is unset or empty. "
-                       f"Using default value: {default}")
+        print(f"Cannot load {description} because environment variable {name} is unset or empty. "
+              f"Using default value: {default}")
         value = default
     return value
 

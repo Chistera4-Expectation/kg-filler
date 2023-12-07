@@ -1,9 +1,7 @@
 
 from kgfiller.ai import ai_query, load_api_from_env
-from kgfiller import enable_logging
 
 
-enable_logging()
 api = load_api_from_env()
 
 

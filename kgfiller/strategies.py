@@ -135,7 +135,7 @@ def _make_queries(kg: KnowledgeGraph,
                   max_retries: int,
                   limit: int = DEFAULT_LIMIT,
                   **replacements) -> Commitable:
-    logger.debug('\nNEW QUERY!')
+    logger.debug(' NEW QUERY! '.center(60, '='))
     questions = [_apply_replacements(pattern, **replacements) for pattern in queries]
     query_processor.reset(kg)
     for question in questions:
