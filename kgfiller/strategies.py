@@ -135,6 +135,7 @@ def _make_queries(kg: KnowledgeGraph,
                   max_retries: int,
                   limit: int = DEFAULT_LIMIT,
                   **replacements) -> Commitable:
+    logger.debug('\nNEW QUERY!')
     questions = [_apply_replacements(pattern, **replacements) for pattern in queries]
     query_processor.reset(kg)
     for question in questions:
@@ -260,8 +261,8 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
         replacements[CLASS_LIST_FANCY].add(f"'{human_name(cls)}'")
         sub_types_by_name[cls.name] = cls
         sub_types_by_name[human_name(cls)] = cls
-    replacements[CLASS_LIST] = ", ".join(replacements[CLASS_LIST])
-    replacements[CLASS_LIST_FANCY] = ", ".join(replacements[CLASS_LIST_FANCY])
+    replacements[CLASS_LIST] = ", ".join(sorted(list(replacements[CLASS_LIST])))
+    replacements[CLASS_LIST_FANCY] = ", ".join(sorted(list(replacements[CLASS_LIST_FANCY])))
     return _make_queries(kg, queries, MoveToMostAdequateClassQueryProcessor(), max_retries=max_retries, **replacements)
 
 
@@ -298,6 +299,7 @@ def check_duplicates(kg: KnowledgeGraph,
     class CheckDuplicatesClassQueryProcessor(SingleResultQueryProcessor):
 
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            logger.debug('results in final message function: {}'.format(results))
             if results:
                 return f"merged {possible_duplicates[0].name} and {possible_duplicates[1].name} together"
             else:
@@ -333,6 +335,6 @@ def check_duplicates(kg: KnowledgeGraph,
     for instance in possible_duplicates:
         replacements[INSTANCE_LIST].add(f"'{instance.name}'")
         replacements[INSTANCE_LIST_FANCY].add(f"'{human_name(instance)}'")
-    replacements[INSTANCE_LIST] = " and ".join(replacements[INSTANCE_LIST])
-    replacements[INSTANCE_LIST_FANCY] = " and ".join(replacements[INSTANCE_LIST_FANCY])
+    replacements[INSTANCE_LIST] = " and ".join(sorted(list(replacements[INSTANCE_LIST])))
+    replacements[INSTANCE_LIST_FANCY] = " and ".join(sorted(list(replacements[INSTANCE_LIST_FANCY])))
     return _make_queries(kg, queries, CheckDuplicatesClassQueryProcessor(), max_retries=max_retries, **replacements)

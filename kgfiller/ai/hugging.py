@@ -109,6 +109,7 @@ class HuggingAiQuery(ai.AiQuery):
         self._select_llm(chat_bot)
         result = chat_bot.query(self.question, truncate=self.limit)
         result.wait_until_done()
+        logger.debug('result from hugging query: {}'.format(result))
         stats.plus(result)
         try:
             chat_bot.delete_all_conversations()
