@@ -299,8 +299,7 @@ def check_duplicates(kg: KnowledgeGraph,
     class CheckDuplicatesClassQueryProcessor(SingleResultQueryProcessor):
 
         def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
-            logger.debug('results in final message function: {}'.format(results))
-            if results:
+            if results[0]:
                 return f"merged {possible_duplicates[0].name} and {possible_duplicates[1].name} together"
             else:
                 return f"instances {possible_duplicates[0].name} and {possible_duplicates[1].name} were NOT merged together"
