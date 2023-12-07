@@ -17,12 +17,17 @@ LOG_FATAL = logging.FATAL
 
 
 def enable_logging(level:int = LOG_DEBUG, format: str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'):
-    handler = logging.StreamHandler()
-    handler.setLevel(level)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(level)
     formatter = logging.Formatter(format)
-    handler.setFormatter(formatter)
+    stream_handler.setFormatter(formatter)
     logger.handlers.clear()
-    logger.addHandler(handler)
+    logger.addHandler(stream_handler)
+    file_handler = logging.FileHandler('kgfiller.log', 'w', 'utf-8')
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
 
 
 PATH_DATA_DIR = pathlib.Path(__file__).parent.parent / "data"
