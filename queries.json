@@ -18,7 +18,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             }
         },
@@ -40,7 +40,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             }
         },
@@ -62,7 +62,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             },
             "falcon": {
@@ -82,7 +82,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             },
             "openchat": {
@@ -102,7 +102,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             },
             "llama-2": {
@@ -122,7 +122,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             }
         },
@@ -144,7 +144,7 @@
                     "most adequate class for '__INSTANCE_NAME_FANCY_' among: __CLASS_LIST_FANCY_. concise"
                 ],
                 "duplicate": [
-                    "are __INSTANCE_LIST_FANCY_ exact duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
+                    "are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_? yes or no answer only"
                 ]
             }
         }
