@@ -95,7 +95,7 @@ class HuggingAiQuery(ai.AiQuery):
         if self.model != chat_bot.active_model.name:
             self._new_conversation(chat_bot)
             models = _hugging_get_available_models(chat_bot)
-            candidates = [(index, model) for index, model in enumerate(models) if self.model.lower() in model.lower()]
+            candidates = [(index, model) for index, model in enumerate(models) if self.model.lower() in model.split('/')[-1].lower()]
             if candidates:
                 chat_bot.switch_llm(candidates[0][0])
                 self.model = candidates[0][1]

@@ -30,8 +30,10 @@ services:
       API: hugging
       N_RECIPES: 50
       # LIMIT: 100
+    volumes:
+      - hugging_mistral_data:/kgfiller/data
 
-  hugging-falcon:
+  hugging-mixtral:
     platform: linux/amd64
     build: .
     secrets:
@@ -40,10 +42,12 @@ services:
     environment:
       RESTORE_ALL_CACHES: "false"
       ONTO: food
-      MODEL: falcon
+      MODEL: mixtral
       API: hugging
       N_RECIPES: 50
       # LIMIT: 100
+    volumes:
+      - hugging_mixtral_data:/kgfiller/data
 
   hugging-openchat:
     platform: linux/amd64
@@ -58,6 +62,8 @@ services:
       API: hugging
       N_RECIPES: 50
       # LIMIT: 100
+    volumes:
+      - hugging_openchat_data:/kgfiller/data
 
   hugging-llama:
     platform: linux/amd64
@@ -73,7 +79,23 @@ services:
       N_RECIPES: 50
       # LIMIT: 100
     volumes:
-      - mistral_data:/kgfiller/data
+      - hugging_llama_data:/kgfiller/data
+
+  hugging-hermes:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      RESTORE_ALL_CACHES: "false"
+      ONTO: food
+      MODEL: nous-hermes
+      API: hugging
+      N_RECIPES: 50
+      # LIMIT: 100
+    volumes:
+      - hugging_hermes_data:/kgfiller/data
 
   almaai-vicuna:
     platform: linux/amd64
@@ -97,8 +119,9 @@ secrets:
 
 volumes:
   gpt35_data: {}
-  mistral_data: {}
-  falcon_data: {}
-  openchat_data: {}
-  llama_data: {}
+  hugging_mistral_data: {}
+  hugging_mixtral_data: {}
+  hugging_openchat_data: {}
+  hugging_llama_data: {}
+  hugging_hermes_data: {}
   vicuna_data: {}
