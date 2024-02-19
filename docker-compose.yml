@@ -38,6 +38,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       ONTO: food
       MODEL: falcon
       API: hugging
@@ -51,6 +52,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       ONTO: food
       MODEL: openchat
       API: hugging
@@ -64,6 +66,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       ONTO: food
       MODEL: llama-2
       API: hugging
@@ -95,4 +98,7 @@ secrets:
 volumes:
   gpt35_data: {}
   mistral_data: {}
+  falcon_data: {}
+  openchat_data: {}
+  llama_data: {}
   vicuna_data: {}
