@@ -28,24 +28,34 @@ export HUGGING_PASSWORD=$(get_secret hugging.password)
 GH_TOKEN=$(get_secret github.token)
 GH_USER=$(get_secret github.user)
 GH_REPO=$(get_secret github.data_repo)
+GH_URL="https://$GH_USER:$GH_TOKEN@github.com/$GH_REPO"
 BRANCH=experiments/$(hostname)
 
-# set up git credentials from secrets
-echo "https://$GH_USER:$GH_TOKEN@github.com/$GH_REPO" >> $HOME/.git-credentials
+if [[ "$POST_MORTEM" = "true" ]]; then
+    /usr/bin/bash 
+else
+    # set up git credentials from secrets
+    echo $GH_URL >> $HOME/.git-credentials
 
-# focusing on the data repository...
-pushd data
-# enforce https authentication for github
-git remote set-url origin "https://github.com/$GH_REPO"
-# create a new branch for this experiment
-git checkout -b $BRANCH
-# restore all the yaml files from all branches
-restore_all_caches
-popd
+    # clone the data repository in ./data/
+    git clone $GH_URL data
 
-# run the kg-filler
-python -m kgfiller
+    # focusing on the data repository...
+    pushd data
+    # put on begin commit
+    git checkout begin
+    # create a new branch for this experiment
+    git checkout -b $BRANCH
+    # restore all the yaml files from all branches
+    if [[ "$RESTORE_ALL_CACHES" = "true" ]]; then
+        restore_all_caches
+    fi
+    popd
 
-# push the experiment branch on github
-cd data
-git push origin $BRANCH
+    # run the kg-filler
+    python -m kgfiller
+
+    # push the experiment branch on github
+    cd data
+    git push origin $BRANCH
+fi

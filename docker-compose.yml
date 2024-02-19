@@ -7,9 +7,12 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       MODEL: gpt-3.5-turbo
       API: openai
       # LIMIT: 100
+    volumes:
+      - gpt35_data:/kgfiller/data
 
   hugging-mistral:
     build: .
@@ -17,9 +20,12 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       MODEL: mistral
       API: hugging
       # LIMIT: 100
+    volumes:
+      - mistral_data:/kgfiller/data
 
   almaai-vicuna:
     build: .
@@ -27,10 +33,18 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
+      RESTORE_ALL_CACHES: "false"
       MODEL: vicuna
       API: almaai
       # LIMIT: 100
+    volumes:
+      - vicuna_data:/kgfiller/data
 
 secrets:
     all_secrets:
         file: secrets.yml
+
+volumes:
+  gpt35_data: {}
+  mistral_data: {}
+  vicuna_data: {}
