@@ -1,41 +1,89 @@
 version: "3.9"
 
-services:
+services:  
   openai-gpt35:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
       RESTORE_ALL_CACHES: "false"
+      ONTO: food
       MODEL: gpt-3.5-turbo
       API: openai
+      N_RECIPES: 50
       # LIMIT: 100
     volumes:
       - gpt35_data:/kgfiller/data
 
   hugging-mistral:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
       RESTORE_ALL_CACHES: "false"
+      ONTO: food
       MODEL: mistral
       API: hugging
+      N_RECIPES: 50
+      # LIMIT: 100
+
+  hugging-falcon:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      ONTO: food
+      MODEL: falcon
+      API: hugging
+      N_RECIPES: 50
+      # LIMIT: 100
+
+  hugging-openchat:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      ONTO: food
+      MODEL: openchat
+      API: hugging
+      N_RECIPES: 50
+      # LIMIT: 100
+
+  hugging-llama:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      ONTO: food
+      MODEL: llama-2
+      API: hugging
+      N_RECIPES: 50
       # LIMIT: 100
     volumes:
       - mistral_data:/kgfiller/data
 
   almaai-vicuna:
+    platform: linux/amd64
     build: .
     secrets:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
       RESTORE_ALL_CACHES: "false"
+      ONTO: food
       MODEL: vicuna
       API: almaai
+      N_RECIPES: 50
       # LIMIT: 100
     volumes:
       - vicuna_data:/kgfiller/data

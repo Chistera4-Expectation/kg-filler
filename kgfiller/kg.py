@@ -4,7 +4,7 @@ import owlready2 as owlready
 import unidecode
 from lazy_property import LazyProperty
 
-from kgfiller import PATH_DATA_DIR, replace_symbols_with
+from kgfiller import PATH_DATA_DIR, replace_symbols_with, logger
 from kgfiller.utils import *
 
 PATH_ONTOLOGY = PATH_DATA_DIR / "ontology.owl"
@@ -117,6 +117,24 @@ class KnowledgeGraph:
         if self.onto.fancyName is not None and name != fancy_name:
             self.add_property(instance, "fancyName", fancy_name)
         return instance
+    
+    def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing, cls: owlready.ThingClass) -> bool:
+        all_instances = [inst for inst in cls.instances()]
+        if not (instance1 in all_instances) or not (instance2 in all_instances):
+            logger.debug('Instance "{}" has been already removed previously...'.format(instance1))
+            return False
+        logger.debug("Merging instances '{}' and '{}'".format(instance1, instance2))
+        for prop in instance2.get_properties():
+            if prop.name != 'fancyName':
+                prop_values = getattr(instance2, prop.name)
+                for value in prop_values:
+                    logger.debug("Cloning property named '{}' of instance '{}' "
+                                 "into instance '{}' with value '{}'".format(prop.name, instance2, 
+                                                                         instance1, value))
+                    self.add_property(instance1, prop.name, value)
+        logger.debug("Destroying instance '{}'".format(instance2))
+        owlready.destroy_entity(instance2)
+        return True
 
     def visit_classes_depth_first(self, root: str | owlready.ThingClass | None = None, postorder=True) -> \
             typing.Iterable[owlready.ThingClass]:

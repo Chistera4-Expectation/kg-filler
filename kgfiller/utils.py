@@ -1,18 +1,28 @@
 import typing
 import os
-from kgfiller import logger
+import pathlib
+import json
 
+
+PATH_REPO = pathlib.Path(__file__).parent.parent
 
 def get_env_var(name: str, default: str, description) -> str:
     value = os.environ[name] if name in os.environ else None
     if value:
-        logger.debug(f"Loaded {description} from environment variable {name}")
+        print(f"Loaded {description} from environment variable {name}")
     else:
-        logger.warning(f"Cannot load {description} because environment variable {name} is unset or empty. "
-                       f"Using default value: {default}")
+        print(f"Cannot load {description} because environment variable {name} is unset or empty. "
+              f"Using default value: {default}")
         value = default
     return value
 
+def load_queries_json():
+    with open(os.path.join(PATH_REPO, "queries.json"), "r") as readfile:
+        queries = json.load(readfile)
+    chosen_onto = get_env_var('ONTOLOGY', 'food', 'Chosen ontology')
+    chosen_api = get_env_var('API', 'almaai', 'Chosen API')
+    chosen_model = get_env_var('MODEL', 'vicuna', 'Chosen model')
+    return queries[chosen_onto][chosen_api][chosen_model]
 
 def overlap(a: typing.Iterable, b: typing.Iterable) -> bool:
     met_in_a = set()

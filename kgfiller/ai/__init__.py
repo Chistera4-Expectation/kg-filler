@@ -103,8 +103,8 @@ class AiQuery:
     def result_text(self) -> str:
         return self._extract_text_from_result(self.result)
     
-    def result_to_list(self) -> typing.List[Item]:
-        return itemize(self.result_text)
+    def result_to_list(self, ignore_ands: bool = False) -> typing.List[Item]:
+        return itemize(self.result_text, ignore_ands=ignore_ands)
 
 
 DEFAULT_API: type = None

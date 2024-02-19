@@ -88,7 +88,7 @@ class HuggingAiQuery(ai.AiQuery):
         return _hugging_chat_bot()
 
     def _new_conversation(self, chat_bot):
-        id = chat_bot.new_conversation()
+        id = chat_bot.new_conversation(system_prompt=self.background)
         chat_bot.change_conversation(id)
 
     def _select_llm(self, chat_bot):
@@ -102,14 +102,26 @@ class HuggingAiQuery(ai.AiQuery):
                 logger.debug(f"Selected model {self.model} for chatbot ${id(chat_bot)}")
             else:
                 logger.warning(f"Model {self.model} not found, using default")
-            self._new_conversation(chat_bot)
+        self._new_conversation(chat_bot)
+
+    def close_conversations(self, chat_bot):
+        try:
+            conversations = chat_bot.get_conversation_list()
+            for conversation in conversations:
+                if conversation != chat_bot.current_conversation:
+                    chat_bot.delete_conversation(conversation)
+        except hugchat.exceptions.DeleteConversationError as e:
+            logger.warning('Unable to delete all conversations with error {}. '
+                           'Trying to delete them next time...'.format(e))
 
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
         self._select_llm(chat_bot)
-        result = chat_bot.query(self.background + ".\n" + self.question, truncate=self.limit)
+        result = chat_bot.query(self.question, truncate=self.limit)
         result.wait_until_done()
+        logger.debug('result from hugging query: {}'.format(result))
         stats.plus(result)
+        self.close_conversations(chat_bot)
         return result
 
     @classmethod

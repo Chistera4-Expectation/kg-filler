@@ -5,6 +5,8 @@ from dataclasses import dataclass
 import nltk
 nltk.download('wordnet')
 from nltk.corpus import wordnet
+import owlready2 as owlready
+from difflib import SequenceMatcher
 
 
 PATTERN_BULLETED = re.compile(r"[-*+]|[#]+")
@@ -135,19 +137,35 @@ def listify(text: str) -> typing.List[typing.Tuple[str, str]]:
         return _listify_line(text)
 
 
-def _itemize(text: str) -> typing.Iterable[Item]:
+def _itemize(text: str, ignore_ands: bool = False) -> typing.Iterable[Item]:
     for prefix_item in listify(text):
         for item in Item.from_string(*prefix_item):
-            for word in item.split_by_words():
-                word = word.strip()
-                if word:
-                    yield Item(value=word, prefix=item.prefix)
+            if not ignore_ands:
+                for word in item.split_by_words():
+                    word = word.strip()
+                    if word:
+                        yield Item(value=word, prefix=item.prefix)
+            else:
+                yield item
 
 
-def itemize(text: str) -> typing.List[Item]:
+def itemize(text: str, ignore_ands: bool = False) -> typing.List[Item]:
     text = text.strip()
-    items = list(_itemize(text))
+    items = list(_itemize(text, ignore_ands))
     if len(items) >= 2 and items[0].prefix != items[1].prefix:
         items = items[1:]
     items = [item for item in items if item.is_meaningful()]
     return items
+
+
+def gather_possible_duplicates(cls: owlready.ThingClass) -> typing.List[typing.Tuple[owlready.Thing, owlready.Thing]]:
+    all_instances = cls.instances()
+    possible_duplicates = []
+    for instance1_index, instance1 in enumerate(all_instances):
+        for instance2 in all_instances[instance1_index+1:]:
+            first_name = instance1.name
+            second_name = instance2.name
+            match = SequenceMatcher(None, first_name, second_name).find_longest_match()
+            if match.size > 3:
+                possible_duplicates.append((instance1, instance2))
+    return possible_duplicates

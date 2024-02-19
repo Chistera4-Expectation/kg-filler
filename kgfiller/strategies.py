@@ -6,7 +6,7 @@ from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery, load_api_from_env
 from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
 from kgfiller.text import Item
-from kgfiller.utils import first_or_none
+from kgfiller.utils import first_or_none, get_env_var
 
 load_api_from_env()
 
@@ -18,9 +18,13 @@ RELATION_NAME = "__RELATION_NAME__"
 RELATION_NAME_FANCY = "__RELATION_NAME_FANCY_"
 CLASS_LIST = "__CLASS_LIST__"
 CLASS_LIST_FANCY = "__CLASS_LIST_FANCY_"
+INSTANCE_LIST = "__INSTANCE_LIST__"
+INSTANCE_LIST_FANCY = "__INSTANCE_LIST_FANCY_"
 
 
 DEFAULT_MAX_RETRIES = 2
+DEFAULT_LIMIT = int(get_env_var("LIMIT", "100", "AI prompt limit"))
+N_RECIPES = get_env_var("N_RECIPES", "50", "Number of recipes to query for")
 
 
 def _apply_replacements(pattern: str, **replacements) -> str:
@@ -129,12 +133,14 @@ def _make_queries(kg: KnowledgeGraph,
                   queries: typing.List[str],
                   query_processor: QueryProcessor,
                   max_retries: int,
+                  limit: int = DEFAULT_LIMIT,
                   **replacements) -> Commitable:
+    logger.debug(' NEW QUERY! '.center(60, '='))
     questions = [_apply_replacements(pattern, **replacements) for pattern in queries]
     query_processor.reset(kg)
     for question in questions:
         for attempt in range(0, max_retries):
-            query = ai_query(question=question, attempt=attempt if attempt > 0 else None)
+            query = ai_query(question=question, attempt=attempt if attempt > 0 else None, limit=limit)
             if not query_processor(query):
                 logger.warning("No results for query '%s', AI answer: %s", query.question, query.result_text)
                 continue
@@ -162,6 +168,29 @@ def find_instances_for_class(kg: KnowledgeGraph,
         CLASS_NAME_FANCY: human_name(cls),
     }
     return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, **replacements)
+
+def find_instances_for_recipes(kg: KnowledgeGraph,
+                             cls: owlready.ThingClass,
+                             queries: typing.List[str],
+                             max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+    class FindInstancesQueryProcessor(MultipleResultsQueryProcessor):
+
+        def admissible(self, kg: KnowledgeGraph, query: AiQuery) -> bool:
+            self._results = query.result_to_list(ignore_ands=True)
+            return len(self._results) > 0
+
+        def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            return f"add {len(results)} instances to class {cls.name} from AI answer"
+
+        def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: Item):
+            instance = kg.add_instance(cls, result.value)
+            self.describe(f"- {result} => adding instance {instance.name} to class {cls.name}")
+            return instance
+
+    replacements = {
+        '__N_RECIPES_': N_RECIPES
+    }
+    return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, limit=1000, **replacements)
 
 
 def find_related_instances(kg: KnowledgeGraph,
@@ -232,8 +261,8 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
         replacements[CLASS_LIST_FANCY].add(f"'{human_name(cls)}'")
         sub_types_by_name[cls.name] = cls
         sub_types_by_name[human_name(cls)] = cls
-    replacements[CLASS_LIST] = ", ".join(replacements[CLASS_LIST])
-    replacements[CLASS_LIST_FANCY] = ", ".join(replacements[CLASS_LIST_FANCY])
+    replacements[CLASS_LIST] = ", ".join(sorted(list(replacements[CLASS_LIST])))
+    replacements[CLASS_LIST_FANCY] = ", ".join(sorted(list(replacements[CLASS_LIST_FANCY])))
     return _make_queries(kg, queries, MoveToMostAdequateClassQueryProcessor(), max_retries=max_retries, **replacements)
 
 
@@ -260,3 +289,51 @@ def move_to_most_adequate_subclass(kg: KnowledgeGraph,
                                    max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
     classes = subclass_selector(root_class)
     return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries)
+
+
+def check_duplicates(kg: KnowledgeGraph,
+                     cls: owlready.ThingClass,
+                     possible_duplicates: typing.Tuple[owlready.Thing,owlready.Thing],
+                     queries: typing.List[str],
+                     max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
+    class CheckDuplicatesClassQueryProcessor(SingleResultQueryProcessor):
+
+        def final_message(self, kg: KnowledgeGraph, query: AiQuery, *results) -> str:
+            if results[0]:
+                return f"merged {possible_duplicates[0].name} and {possible_duplicates[1].name} together"
+            else:
+                return f"instances {possible_duplicates[0].name} and {possible_duplicates[1].name} were NOT merged together"
+
+        def parse_result(self, kg: KnowledgeGraph, query: AiQuery) -> typing.Any:
+            return query.result_text
+        
+        def admissible(self, kg: KnowledgeGraph, query: AiQuery) -> bool:
+            self._result = self.parse_result(kg, query)
+            return self._result is not None and query.question not in self._result
+
+        def process_result(self, kg: KnowledgeGraph, query: AiQuery, result: typing.Any):
+            logger.debug('Query:\t{}\nAnswer:\t{}'.format(query.question, query.result_text))
+            if 'yes' in result.lower():
+                self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are semantically identical.")
+                merge_outcome = kg.merge_instances(possible_duplicates[0], possible_duplicates[1], cls)
+                if not merge_outcome:
+                    self.describe(f"instances not merged cause at least one was already merged previously.")
+                return merge_outcome
+            elif 'no' in result.lower():
+                self.describe(f"meaning that instances {possible_duplicates[0].name} and {possible_duplicates[1].name} are different.")
+                return False
+            else:
+                logger.warning('Answer to instance merge query does not contain YES or NO!')
+
+    replacements = {
+        INSTANCE_LIST: set(),
+        INSTANCE_LIST_FANCY: set(),
+        CLASS_NAME: cls.name,
+        CLASS_NAME_FANCY: human_name(cls),
+    }
+    for instance in possible_duplicates:
+        replacements[INSTANCE_LIST].add(f"'{instance.name}'")
+        replacements[INSTANCE_LIST_FANCY].add(f"'{human_name(instance)}'")
+    replacements[INSTANCE_LIST] = " and ".join(sorted(list(replacements[INSTANCE_LIST])))
+    replacements[INSTANCE_LIST_FANCY] = " and ".join(sorted(list(replacements[INSTANCE_LIST_FANCY])))
+    return _make_queries(kg, queries, CheckDuplicatesClassQueryProcessor(), max_retries=max_retries, **replacements)
