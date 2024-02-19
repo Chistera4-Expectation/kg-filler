@@ -52,8 +52,11 @@ else
     fi
     popd
 
+    # set up the timeout for the kg-filler
+    MAX_DURATION=${TIMEOUT:-1d}
+
     # run the kg-filler
-    python -m kgfiller
+    timeout $MAX_DURATION python -m kgfiller
 
     # push the experiment branch on github
     cd data

@@ -6,4 +6,5 @@ RUN pip install -r requirements.txt
 ENV SECRETS_PATH /run/secrets/all_secrets.yml
 ENV RESTORE_ALL_CACHES false
 ENV POST_MORTEM false
+ENV TIMEOUT 2d
 ENTRYPOINT [ "/usr/bin/bash", "entrypoint.sh" ]
