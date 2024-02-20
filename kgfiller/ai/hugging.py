@@ -1,5 +1,6 @@
 import typing
 from dataclasses import dataclass
+import time
 
 from hugchat import hugchat
 from hugchat.login import Login
@@ -88,8 +89,19 @@ class HuggingAiQuery(ai.AiQuery):
         return _hugging_chat_bot()
 
     def _new_conversation(self, chat_bot):
-        id = chat_bot.new_conversation(system_prompt=self.background)
-        chat_bot.change_conversation(id)
+        timeout = 30  # seconds
+        while True:
+            try:
+                logger.debug('Trying to open new conversation...')
+                id = chat_bot.new_conversation(system_prompt=self.background)
+                chat_bot.change_conversation(id)
+                logger.debug('New conversation opened successfully!')
+                break
+            except Exception as e:
+                logger.warning('Unable to open new conversation with error {}. '
+                                'Retrying in {:.2f} seconds...'.format(e, timeout))
+                time.sleep(timeout)
+                timeout *= 1.5
 
     def _select_llm(self, chat_bot):
         if self.model != chat_bot.active_model.name:
@@ -105,14 +117,21 @@ class HuggingAiQuery(ai.AiQuery):
         self._new_conversation(chat_bot)
 
     def close_conversations(self, chat_bot):
-        try:
-            conversations = chat_bot.get_conversation_list()
-            for conversation in conversations:
-                if conversation != chat_bot.current_conversation:
-                    chat_bot.delete_conversation(conversation)
-        except hugchat.exceptions.DeleteConversationError as e:
-            logger.warning('Unable to delete all conversations with error {}. '
-                           'Trying to delete them next time...'.format(e))
+        timeout = 30  # seconds
+        while True:
+            try:
+                logger.debug('Trying to close conversations...')
+                conversations = chat_bot.get_conversation_list()
+                for conversation in conversations:
+                    if conversation != chat_bot.current_conversation:
+                        chat_bot.delete_conversation(conversation)
+                logger.debug('Closed all conversations successfully!')
+                break
+            except Exception as e:
+                logger.warning('Unable to delete all conversations with error {}. '
+                            'Retrying in {:.2f} seconds...'.format(e, timeout))
+                time.sleep(timeout)
+                timeout *= 1.5
 
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
@@ -126,7 +145,7 @@ class HuggingAiQuery(ai.AiQuery):
 
     @classmethod
     def _limit_error(cls) -> typing.Iterable[typing.Type[Exception]]:
-        return hugchat.exceptions.ModelOverloadedError, hugchat.exceptions.ChatError
+        return hugchat.exceptions.ModelOverloadedError, hugchat.exceptions.ChatError, Exception
 
     def _chat_completion_to_dict(self, chat_completion) -> dict:
         return {
