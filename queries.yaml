@@ -1,0 +1,64 @@
+---
+food:
+  openai:
+    gpt-3.5-turbo:
+      instance: &standard_instance_queries
+      - instances list for class __CLASS_NAME_FANCY_, names only
+      - instances list for class __CLASS_NAME_FANCY_
+      - examples list for __CLASS_NAME_FANCY_, names only
+      - examples list for __CLASS_NAME_FANCY_
+      recipe: &standard_recipe_queries
+      - list of __N_RECIPES_ famous recipes, concise names only
+      relation: &standard_relation_queries
+      - ingredient list for __INSTANCE_NAME_FANCY_, names only
+      rebalance: &standard_rebalance_queries
+      - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_.
+        concise'
+      duplicate: &standard_duplicate_queries
+      - are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_?
+        yes or no answer only
+  almaai:
+    vicuna:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+  hugging:
+    mistral:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+    mixtral:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+    openchat:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+    llama-2:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+    nous-hermes:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
+  anthropic:
+    claude-instant-1:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries

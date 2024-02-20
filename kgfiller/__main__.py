@@ -3,10 +3,10 @@ from kgfiller.git import DataRepository
 from kgfiller.kg import subtype
 from kgfiller.strategies import *
 from kgfiller.text import gather_possible_duplicates
-from kgfiller.utils import load_queries_json
+from kgfiller.utils import load_queries_yaml
 
 
-queries = load_queries_json()
+queries = load_queries_yaml()
 instance_queries = queries['instance']
 recipe_queries = queries['recipe']
 relation_queries = queries['relation']

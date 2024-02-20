@@ -2,6 +2,7 @@ import typing
 import os
 import pathlib
 import json
+import yaml
 
 
 PATH_REPO = pathlib.Path(__file__).parent.parent
@@ -22,6 +23,16 @@ def load_queries_json():
     chosen_onto = get_env_var('ONTOLOGY', 'food', 'Chosen ontology')
     chosen_api = get_env_var('API', 'almaai', 'Chosen API')
     chosen_model = get_env_var('MODEL', 'vicuna', 'Chosen model')
+    return queries[chosen_onto][chosen_api][chosen_model]
+
+def load_queries_yaml():
+    print('Loading queries from yaml file at {}...'.format(os.path.join(PATH_REPO, "queries.yaml")))
+    with open(os.path.join(PATH_REPO, "queries.yaml"), "r") as readfile:
+        queries = yaml.safe_load(readfile)
+    chosen_onto = get_env_var('ONTOLOGY', 'food', 'Chosen ontology')
+    chosen_api = get_env_var('API', 'almaai', 'Chosen API')
+    chosen_model = get_env_var('MODEL', 'vicuna', 'Chosen model')
+    print('queries found: {}'.format(queries[chosen_onto][chosen_api][chosen_model]))
     return queries[chosen_onto][chosen_api][chosen_model]
 
 def overlap(a: typing.Iterable, b: typing.Iterable) -> bool:
