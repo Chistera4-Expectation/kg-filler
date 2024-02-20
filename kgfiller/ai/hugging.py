@@ -98,7 +98,7 @@ class HuggingAiQuery(ai.AiQuery):
                 logger.debug('New conversation opened successfully!')
                 break
             except Exception as e:
-                logger.warning('Unable to open new conversation with error {}. '
+                logger.warning('Unable to open new conversation with error "{}". '
                                 'Retrying in {:.2f} seconds...'.format(e, timeout))
                 time.sleep(timeout)
                 timeout *= 1.5
@@ -128,7 +128,7 @@ class HuggingAiQuery(ai.AiQuery):
                 logger.debug('Closed all conversations successfully!')
                 break
             except Exception as e:
-                logger.warning('Unable to delete all conversations with error {}. '
+                logger.warning('Unable to delete all conversations with error "{}". '
                             'Retrying in {:.2f} seconds...'.format(e, timeout))
                 time.sleep(timeout)
                 timeout *= 1.5
