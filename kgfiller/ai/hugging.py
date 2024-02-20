@@ -99,7 +99,7 @@ class HuggingAiQuery(ai.AiQuery):
                 break
             except Exception as e:
                 logger.warning('Unable to open new conversation with error "{}". '
-                                'Retrying in {:.2f} seconds...'.format(e, timeout))
+                                'Retrying in {} seconds...'.format(e, timeout))
                 time.sleep(timeout)
                 timeout *= 1.5
 
@@ -129,7 +129,7 @@ class HuggingAiQuery(ai.AiQuery):
                 break
             except Exception as e:
                 logger.warning('Unable to delete all conversations with error "{}". '
-                            'Retrying in {:.2f} seconds...'.format(e, timeout))
+                            'Retrying in {} seconds...'.format(e, timeout))
                 time.sleep(timeout)
                 timeout *= 1.5
 
