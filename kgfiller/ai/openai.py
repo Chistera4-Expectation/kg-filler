@@ -65,7 +65,7 @@ class OpenAiQuery(ai.AiQuery):
 
     @classmethod
     def _limit_error(cls) -> typing.Iterable[typing.Type[Exception]]:
-        return openai.error.RateLimitError, openai.error.Timeout, openai.error.APIConnectionError
+        return openai.error.RateLimitError, openai.error.Timeout, openai.error.APIConnectionError, openai.error.ServiceUnavailableError
 
     def _chat_completion_to_dict(self, chat_completion) -> dict:
         return yaml.safe_load(str(chat_completion))
