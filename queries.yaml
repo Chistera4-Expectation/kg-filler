@@ -17,6 +17,12 @@ food:
       duplicate: &standard_duplicate_queries
       - are __INSTANCE_LIST_FANCY_ semantic duplicate instances in class __CLASS_NAME_FANCY_?
         yes or no answer only
+    gpt-4-turbo-preview:
+      instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance: *standard_rebalance_queries
+      duplicate: *standard_duplicate_queries
   almaai:
     vicuna:
       instance: *standard_instance_queries

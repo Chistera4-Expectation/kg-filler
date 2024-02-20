@@ -17,6 +17,22 @@ services:
     volumes:
       - gpt35_data:/kgfiller/data
 
+  openai-gpt4:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      RESTORE_ALL_CACHES: "false"
+      ONTO: food
+      MODEL: gpt-4-turbo-preview
+      API: openai
+      N_RECIPES: 50
+      # LIMIT: 100
+    volumes:
+      - gpt4_data:/kgfiller/data
+
   hugging-mistral:
     platform: linux/amd64
     build: .
@@ -119,6 +135,7 @@ secrets:
 
 volumes:
   gpt35_data: {}
+  gpt4_data: {}
   hugging_mistral_data: {}
   hugging_mixtral_data: {}
   hugging_openchat_data: {}
