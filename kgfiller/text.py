@@ -158,8 +158,17 @@ def itemize(text: str, ignore_ands: bool = False) -> typing.List[Item]:
     return items
 
 
-def gather_possible_duplicates(cls: owlready.ThingClass) -> typing.List[typing.Tuple[owlready.Thing, owlready.Thing]]:
+def gather_all_instances_of_class_without_subclasses(cls: owlready.ThingClass) -> typing.List[owlready.Thing]:
     all_instances = cls.instances()
+    all_subclasses = list(cls.subclasses())
+    all_subclasses_instances = [sub_cls.instances() for sub_cls in all_subclasses]
+    all_subclasses_instances = [elem for sub_cls_list in all_subclasses_instances for elem in sub_cls_list]
+    superclass_instances = [elem for elem in all_instances if elem not in all_subclasses_instances]
+    return superclass_instances
+
+
+def gather_possible_duplicates(cls: owlready.ThingClass) -> typing.List[typing.Tuple[owlready.Thing, owlready.Thing]]:
+    all_instances = gather_all_instances_of_class_without_subclasses(cls=cls)
     possible_duplicates = []
     for instance1_index, instance1 in enumerate(all_instances):
         for instance2 in all_instances[instance1_index+1:]:
