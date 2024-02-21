@@ -42,6 +42,7 @@ class AiQuery:
                 if not isinstance(errors, typing.Iterable):
                     errors = [errors]
                 if any(isinstance(e, t) for t in errors):
+                    logger.warning("Encountered and catched error: {}".format(e))
                     logger.warning("Rate limit exceeded, retrying in {} seconds".format(timeout))
                     time.sleep(timeout)
                     timeout *= 1.5
