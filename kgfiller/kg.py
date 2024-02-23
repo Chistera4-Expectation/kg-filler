@@ -120,8 +120,11 @@ class KnowledgeGraph:
     
     def merge_instances(self, instance1: owlready.Thing, instance2: owlready.Thing, cls: owlready.ThingClass) -> bool:
         all_instances = [inst for inst in cls.instances()]
-        if not (instance1 in all_instances) or not (instance2 in all_instances):
+        if not (instance1 in all_instances):
             logger.debug('Instance "{}" has been already removed previously...'.format(instance1))
+            return False
+        if not (instance2 in all_instances):
+            logger.debug('Instance "{}" has been already removed previously...'.format(instance2))
             return False
         logger.debug("Merging instances '{}' and '{}'".format(instance1, instance2))
         for prop in instance2.get_properties():
