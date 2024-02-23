@@ -37,17 +37,18 @@ with DataRepository() as repo:
         logger.debug('Step 4. Refining position of food instances...')
         already_met_instances = set()
         for cls in kg.visit_classes_depth_first():
-            if not is_leaf(cls) and not subtype(cls, Recipe):
+            if not is_leaf(cls):
+                classes_to_avoid = [Recipe] if not subtype(cls, Recipe) else None
                 for instance in gather_all_instances_of_class_without_subclasses(cls):
                     if instance not in already_met_instances:
                         logger.debug('Step 4. Checking instance "{}" in class "{}"...'.format(instance, cls))
                         already_met_instances.add(instance)
-                        commit = move_to_most_adequate_subclass(kg, instance, cls, leaf_descendants, rebalance_queries)
+                        commit = move_to_most_adequate_subclass(kg, instance, cls, leaf_descendants, rebalance_queries, classes_to_avoid=classes_to_avoid)
                         if not commit.should_commit:
                             commit.should_commit = True
                             kg.save()
                             repo.maybe_commit(commit)
-                            commit = move_to_most_adequate_subclass(kg, instance, cls, all_descendants, rebalance_queries)
+                            commit = move_to_most_adequate_subclass(kg, instance, cls, all_descendants, rebalance_queries, classes_to_avoid=classes_to_avoid)
                         commit.should_commit = True
                         kg.save()
                         repo.maybe_commit(commit)

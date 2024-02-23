@@ -4,7 +4,7 @@ import owlready2 as owlready
 
 from kgfiller import logger, Commitable, Commit
 from kgfiller.ai import ai_query, AiQuery, load_api_from_env
-from kgfiller.kg import KnowledgeGraph, human_name, is_leaf
+from kgfiller.kg import KnowledgeGraph, human_name, is_leaf, subtype
 from kgfiller.text import Item
 from kgfiller.utils import first_or_none, get_env_var
 
@@ -269,16 +269,26 @@ def move_to_most_adequate_class(kg: KnowledgeGraph,
 SubClassSelector = typing.Callable[[owlready.ThingClass], typing.Iterable[owlready.ThingClass]]
 
 
-def direct_subclasses(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
-    return cls.subclasses()
+def avoid_classes(clss: typing.Iterable[owlready.ThingClass], classes_to_avoid: typing.Iterable[owlready.ThingClass] = None) -> typing.Iterable[owlready.ThingClass]:
+    if classes_to_avoid is None:
+        return clss
+    else:
+        return (cls for cls in clss if not any([subtype(cls, cls_to_avoid) for cls_to_avoid in classes_to_avoid]))
 
 
-def all_descendants(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
-    return cls.descendants()
+def direct_subclasses(cls: owlready.ThingClass, classes_to_avoid: typing.Iterable[owlready.ThingClass] = None) -> typing.Iterable[owlready.ThingClass]:
+    sub_classes = cls.subclasses()
+    return avoid_classes(clss=sub_classes, classes_to_avoid=classes_to_avoid)
 
 
-def leaf_descendants(cls: owlready.ThingClass) -> typing.Iterable[owlready.ThingClass]:
-    return (c for c in all_descendants(cls) if is_leaf(c))
+def all_descendants(cls: owlready.ThingClass, classes_to_avoid: typing.Iterable[owlready.ThingClass] = None) -> typing.Iterable[owlready.ThingClass]:
+    descendants = cls.descendants()
+    return avoid_classes(clss=descendants, classes_to_avoid=classes_to_avoid)
+
+
+def leaf_descendants(cls: owlready.ThingClass, classes_to_avoid: typing.Iterable[owlready.ThingClass] = None) -> typing.Iterable[owlready.ThingClass]:
+    leaf_descents = (c for c in all_descendants(cls) if is_leaf(c))
+    return avoid_classes(clss=leaf_descents, classes_to_avoid=classes_to_avoid)
 
 
 def move_to_most_adequate_subclass(kg: KnowledgeGraph,
@@ -286,8 +296,9 @@ def move_to_most_adequate_subclass(kg: KnowledgeGraph,
                                    root_class: owlready.ThingClass,
                                    subclass_selector: SubClassSelector,
                                    queries: typing.List[str],
-                                   max_retries: int = DEFAULT_MAX_RETRIES) -> Commitable:
-    classes = subclass_selector(root_class)
+                                   max_retries: int = DEFAULT_MAX_RETRIES,
+                                   classes_to_avoid: typing.Iterable[owlready.ThingClass] = None) -> Commitable:
+    classes = subclass_selector(root_class, classes_to_avoid=classes_to_avoid)
     return move_to_most_adequate_class(kg, instance, classes, queries, max_retries=max_retries)
 
 
