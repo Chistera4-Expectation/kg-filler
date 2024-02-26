@@ -15,8 +15,6 @@ food:
       - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_.
         concise'
       duplicate: &standard_duplicate_queries
-      # - are __INSTANCE_LIST_FANCY_ exact semantic and etymologic duplicate instances in the edible class __CLASS_NAME_FANCY_?
-      #   yes or no answer only
       - should __INSTANCE_LIST_FANCY_ be merged semantically in the edible class __CLASS_NAME_FANCY_?
       yes or no answer only
     gpt-4-turbo-preview:
