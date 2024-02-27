@@ -8,7 +8,7 @@ food:
       - examples list for __CLASS_NAME_FANCY_, names only
       - examples list for __CLASS_NAME_FANCY_
       recipe: &standard_recipe_queries
-      - list of __N_RECIPES_ famous recipes, concise names only
+      - list of __N_RECIPES_ famous __CLASS_NAME_FANCY_s, concise names only
       relation: &standard_relation_queries
       - ingredient list for __INSTANCE_NAME_FANCY_, names only
       rebalance: &standard_rebalance_queries

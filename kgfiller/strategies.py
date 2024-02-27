@@ -188,7 +188,8 @@ def find_instances_for_recipes(kg: KnowledgeGraph,
             return instance
 
     replacements = {
-        '__N_RECIPES_': N_RECIPES
+        '__N_RECIPES_': N_RECIPES,
+        CLASS_NAME_FANCY: human_name(cls),
     }
     return _make_queries(kg, queries, FindInstancesQueryProcessor(), max_retries=max_retries, limit=1000, **replacements)
 

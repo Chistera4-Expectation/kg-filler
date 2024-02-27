@@ -25,9 +25,12 @@ with DataRepository() as repo:
                 kg.save()
                 repo.maybe_commit(commit)
         logger.debug('Step 2. Finding recipe instances...')
-        commit = find_instances_for_recipes(kg, Recipe, recipe_queries)
-        kg.save()
-        repo.maybe_commit(commit)
+        for cls in kg.visit_classes_depth_first():
+            if subtype(cls, Recipe, strict=True):
+                logger.debug('Step 2. Finding recipe instances for class "{}"...'.format(cls))
+                commit = find_instances_for_recipes(kg, cls, recipe_queries)
+                kg.save()
+                repo.maybe_commit(commit)
         logger.debug('Step 3. Finding relation instances...')
         for instance in kg.onto.Recipe.instances():
             logger.debug('Step 3. Checking instance "{}"...'.format(instance))
