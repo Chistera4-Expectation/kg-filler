@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import openai
 import yaml
 
-from kgfiller import unescape
+from kgfiller import logger, unescape
 import kgfiller.ai as ai
 from kgfiller.utils import get_env_var
 
@@ -55,6 +55,7 @@ class OpenAiQuery(ai.AiQuery):
         result = openai.ChatCompletion.create(
             model=self.model,
             max_tokens=self.limit,
+            temperature = 0 if any([token in self.question for token in ['merge', 'duplicates']]) else None,
             messages=[
                 {"role": "system", "content": self.background},
                 {"role": "user", "content": self.question}

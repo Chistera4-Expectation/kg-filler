@@ -138,7 +138,9 @@ class HuggingAiQuery(ai.AiQuery):
     def _chat_completion_step(self):
         chat_bot = self._create_chatbot()
         self._select_llm(chat_bot)
-        result = chat_bot.query(self.question, truncate=self.limit)
+        result = chat_bot.query(self.question,
+                                temperature = 0 if any([token in self.question for token in ['merge', 'duplicates']]) else None,
+                                truncate=self.limit)
         result.wait_until_done()
         logger.debug('result from hugging query: {}'.format(result))
         stats.plus(result)

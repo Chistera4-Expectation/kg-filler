@@ -15,8 +15,8 @@ food:
       - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_.
         concise'
       duplicate: &standard_duplicate_queries
-      - should __INSTANCE_LIST_FANCY_ be merged semantically in the edible class __CLASS_NAME_FANCY_?
-      yes or no answer only
+      - in the __CLASS_NAME_FANCY_ class, should the instances __INSTANCE_LIST_FANCY_ be merged together as semantic and ontologic duplicates?
+        yes or no answer only
     gpt-4-turbo-preview:
       instance: *standard_instance_queries
       recipe: *standard_recipe_queries
