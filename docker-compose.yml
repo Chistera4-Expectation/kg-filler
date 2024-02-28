@@ -113,6 +113,22 @@ services:
     volumes:
       - hugging_hermes_data:/kgfiller/data
 
+  hugging-gemma:
+    platform: linux/amd64
+    build: .
+    secrets:
+      - source: all_secrets
+        target: /run/secrets/all_secrets.yml
+    environment:
+      RESTORE_ALL_CACHES: "false"
+      ONTO: food
+      MODEL: gemma
+      API: hugging
+      N_RECIPES: 20
+      # LIMIT: 100
+    volumes:
+      - hugging_gemma_data:/kgfiller/data
+
   almaai-vicuna:
     platform: linux/amd64
     build: .
@@ -141,4 +157,5 @@ volumes:
   hugging_openchat_data: {}
   hugging_llama_data: {}
   hugging_hermes_data: {}
+  hugging_gemma_data: {}
   vicuna_data: {}

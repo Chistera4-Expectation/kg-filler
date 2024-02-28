@@ -33,15 +33,18 @@ food:
   hugging:
     mistral:
       instance: *standard_instance_queries
-      recipe: *standard_recipe_queries
+      recipe:
+      - list of __N_RECIPES_ famous __CLASS_NAME_FANCY_s, names only
       relation: *standard_relation_queries
-      rebalance: *standard_rebalance_queries
+      rebalance:
+      - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_. Concise class name only'
       duplicate: *standard_duplicate_queries
     mixtral:
       instance: *standard_instance_queries
       recipe: *standard_recipe_queries
       relation: *standard_relation_queries
-      rebalance: *standard_rebalance_queries
+      rebalance:
+      - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_. Concise class name only'
       duplicate: *standard_duplicate_queries
     openchat:
       instance: *standard_instance_queries
@@ -53,10 +56,22 @@ food:
       instance: *standard_instance_queries
       recipe: *standard_recipe_queries
       relation: *standard_relation_queries
-      rebalance: *standard_rebalance_queries
+      rebalance:
+      - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_. Concise class name only'
       duplicate: *standard_duplicate_queries
     nous-hermes:
       instance: *standard_instance_queries
+      recipe: *standard_recipe_queries
+      relation: *standard_relation_queries
+      rebalance:
+      - 'most adequate class for ''__INSTANCE_NAME_FANCY_'' among: __CLASS_LIST_FANCY_. Concise class name only'
+      duplicate: *standard_duplicate_queries
+    gemma:
+      instance:
+      - instances list for class __CLASS_NAME_FANCY_, concise names only
+      - instances list for class __CLASS_NAME_FANCY_, concise names
+      - examples list for __CLASS_NAME_FANCY_, names only
+      - examples list for __CLASS_NAME_FANCY_, concise names
       recipe: *standard_recipe_queries
       relation: *standard_relation_queries
       rebalance: *standard_rebalance_queries
