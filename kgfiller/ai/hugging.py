@@ -130,6 +130,9 @@ class HuggingAiQuery(ai.AiQuery):
                 break
             except Exception as e:
                 logger.warning("Encountered and catched error: {}".format(e))
+                if isinstance(e, hugchat.exceptions.DeleteConversationError) and ('404' in str(e) or '504' in str(e)):
+                    logger.warning("Skipping 404 and 504 errors, closing conversations next time...")
+                    break
                 logger.warning('Unable to delete all conversations with error "{}". '
                             'Retrying in {} seconds...'.format(e, timeout))
                 time.sleep(timeout)
