@@ -29,7 +29,7 @@ GH_TOKEN=$(get_secret github.token)
 GH_USER=$(get_secret github.user)
 GH_REPO=$(get_secret github.data_repo)
 GH_URL="https://$GH_USER:$GH_TOKEN@github.com/$GH_REPO"
-BRANCH=experiments/$(hostname)
+BRANCH=experiments/$ONTO-$API-$MODEL-$(date +'%Y-%m-%d-%H-%M')-$(hostname)
 
 if [[ "$POST_MORTEM" = "true" ]]; then
     /usr/bin/bash 
