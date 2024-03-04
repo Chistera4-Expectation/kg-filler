@@ -8,7 +8,7 @@ function restore_all_caches() {
     git fetch --all
     for BRANCH in $(git branch -r | tail -n +2 | cut -c 3-); do
         git checkout $BRANCH -- '*.yml'
-        git reset *.yml
+        git reset .
     done
 }
 
