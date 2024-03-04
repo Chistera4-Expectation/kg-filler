@@ -8,7 +8,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: gpt-3.5-turbo
       API: openai
@@ -24,7 +24,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: gpt-4-turbo-preview
       API: openai
@@ -40,7 +40,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: mistral
       API: hugging
@@ -56,7 +56,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: mixtral
       API: hugging
@@ -72,7 +72,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: openchat
       API: hugging
@@ -88,7 +88,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: llama-2
       API: hugging
@@ -104,7 +104,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: nous-hermes
       API: hugging
@@ -120,7 +120,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: gemma
       API: hugging
@@ -136,7 +136,7 @@ services:
       - source: all_secrets
         target: /run/secrets/all_secrets.yml
     environment:
-      RESTORE_ALL_CACHES: "false"
+      RESTORE_ALL_CACHES: "true"
       ONTO: food
       MODEL: vicuna
       API: almaai
