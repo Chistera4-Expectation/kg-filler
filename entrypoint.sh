@@ -6,8 +6,8 @@ function get_secret() {
 
 function restore_all_caches() {
     git fetch --all
-    for BRANCH in $(git branch -r | tail -n +2 | cut -c 3-); do
-        git checkout $BRANCH -- '*.yml'
+    for B in $(git branch -r | tail -n +2 | cut -c 3-); do
+        git checkout $B -- '*.yml'
         git reset .
     done
 }
@@ -38,10 +38,10 @@ else
     echo $GH_URL >> $HOME/.git-credentials
 
     # clone the data repository in ./data/
-    git clone $GH_URL data
+    git clone $GH_URL /kgfiller/data
 
     # focusing on the data repository...
-    pushd data
+    cd /kgfiller/data
     # put on begin commit
     git checkout begin
     # create a new branch for this experiment
@@ -49,8 +49,9 @@ else
     # restore all the yaml files from all branches
     if [[ "$RESTORE_ALL_CACHES" = "true" ]]; then
         restore_all_caches
+        git checkout -b $BRANCH
     fi
-    popd
+    cd /kgfiller
 
     # set up the timeout for the kg-filler
     MAX_DURATION=${TIMEOUT:-1d}
@@ -59,6 +60,6 @@ else
     timeout $MAX_DURATION python -m kgfiller
 
     # push the experiment branch on github
-    cd data
+    cd /kgfiller/data
     git push origin $BRANCH
 fi
